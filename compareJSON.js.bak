@@ -1,0 +1,177 @@
+var META_TYPE = {
+	"string": "",
+	"number": "",
+	"boolean": "",
+	"null": "",
+	"undefined": "",
+	"NaN": ""
+}
+
+function aryEqual(ary1, ary2) {
+	if(ary1 === ary2) return true;
+	var rev = true;
+}
+
+function objEqual(obj1, obj2) {
+	if(obj1 === obj2) return true;
+	var rev = true;
+	for(prop in obj1) {
+		if(prop in obj2) {
+			if(typeof obj1[prop] in META_TYPE) {
+				if(obj1[prop] !== obj2[prop]) {
+					return false;
+				}
+			} else if(obj1[prop] instanceof Array) {
+				if(obj2[prop] instanceof Array) {
+					if(obj1[prop].length !== obj2[prop].length) return false;
+					
+				}
+			}else if(typeof obj1[prop] === "object") {
+				return objEqual(obj1[prop], obj2[prop]);
+			}
+		} else {
+			return false;
+		}
+	}
+}
+
+function extendJSON(obj_rev, obj1, obj2) {
+	for(prop in obj1) {
+		if(typeof obj1[prop] in META_TYPE) {
+			obj_rev[prop] = obj1[prop];
+		} else if(obj1[prop] instanceof Array) {
+			obj_rev[prop] = obj1[prop].slice();
+		} else if(typeof obj1[prop] === "object") {
+			obj_rev[prop] = {};
+			extendJSON(obj_rev[prop], obj1[prop]);
+		}
+	}
+
+	for(prop in obj2) {
+		if(typeof obj2[prop] in META_TYPE) {
+			obj_rev[prop] = obj2[prop];
+		} else if(obj2[prop] instanceof Array) {
+			if(prop in obj_rev) {
+				obj2[prop].forEach(function(val, index) {
+					if(obj_rev[prop].indexOf(val) === -1) {
+						obj_rev[prop].push(val);
+					}
+				});
+			} else {
+				obj_rev[prop] = obj2[prop].slice();
+			}
+		} else if(typeof obj2[prop] === "object") {
+			if(!(prop in obj_rev)) {
+				obj_rev[prop] = {};
+			}
+			extendJSON(obj_rev[prop], {}, obj2[prop]);
+		}
+	}
+}
+
+function compareJSON(obj_rev, obj1, obj2) {
+	//$.extend(true, obj_rev, obj1, obj2);
+	//console.log(obj_rev);
+	
+	for(prop in obj_rev) {
+		if(prop !== "type") {
+			//console.log(prop);
+			if(prop in obj2 && !(prop in obj1)) {
+				//obj_rev[prop] = $.extend({}, obj2[prop]);
+				obj_rev[prop].compare_options = "add";
+			} else if(!(prop in obj2) && prop in obj1) {
+				//obj_rev[prop] = $.extend({}, obj1[prop]);
+				obj_rev[prop].compare_options = "del";
+			} else {
+				// if($.type(obj_rev[prop]) in {"string":"", "number":"", "boolean":"", "null":"", "undefined":""}) {
+				// 	//console.log(prop);
+				// 	//console.log(obj2[prop], obj1[prop]);
+				// 	if(obj2[prop] === obj1[prop]) {
+				// 		obj_rev.compare_options = "eq";
+				// 	} else {
+				// 		obj_rev.compare_options = "mod";
+				// 	}
+				// } else {
+				// 	compareJSON(obj_rev[prop], obj1[prop], obj2[prop]);
+				// }
+				if(obj1[prop].type !== obj2[prop].type) {
+					obj_rev[prop].compare_options = "mod";
+				} else {
+					if(obj1[prop].type === "text") {
+						if(obj1.data === obj2.data) {
+							obj_rev[prop].compare_options = "eq";
+						} else {
+							obj_rev[prop].compare_options = "mod";
+						}
+					} else {
+						compareJSON(obj_rev[prop], obj1[prop], obj2[prop]);
+					}
+				}
+			}
+		}
+	}
+	return true
+}
+
+var obj1 = {
+	"type": "object",
+	"data": {
+		"name": {
+			"type": "list",
+			"data": [
+				{
+					"type": "text",
+					"data": "Chenglee"
+				},
+				{
+					"type": "text",
+					"data": "Tom"
+				}
+			]
+		},
+		"age": {
+			"type": "text",
+			"data": "33"
+		},
+		"interest": {
+			"type": "text",
+			"data": "swimming"
+		}
+	}
+};
+var obj2 = {
+	"type": "object",
+	"data": {
+		"name": {
+			"type": "list",
+			"data": [
+				{
+					"type": "text",
+					"data": "Marry"
+				},
+				{
+					"type": "text",
+					"data": "Tom"
+				},
+				{
+					"type": "text",
+					"data": "Jack"
+				}
+			]
+		},
+		"age": {
+			"type": "text",
+			"data": "33"
+		},
+		"sex": {
+			"type": "text",
+			"data": "male"
+		}
+	}
+};
+var obj_rev = {};
+extendJSON(obj_rev, obj1, obj2);
+console.log(obj_rev);
+// compareJSON(obj_rev, obj1, obj2);
+// console.log("----------------------------");
+// console.log(obj_rev);
