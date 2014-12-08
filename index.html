@@ -125,14 +125,15 @@
 </head>
 <body>
 <script type="text/x-jsrender" id="tree_right">
-{{if prop.type === "text"}}
+{{if prop.compare_options !== "type_mod"}}
+    {{if prop.type === "text"}}
 <div class="tree-item {{:prop.compare_options}}">
 	<div class="tree-item-name">
         <i class="ace-icon ace-icon"></i> {{:key}}:
         <span class="data-text">{{:prop.data}}</span>
     </div>
 </div>
-{{else prop.type === "object" || prop.type === "list"}}
+    {{else prop.type === "object" || prop.type === "list"}}
 <div class="tree-folder {{:prop.compare_options}} {{if prop.compare_options === 'eq'}}closed{{/if}}" data-path="{{:key}}">
     <div class="tree-folder-header">
         <i class="ace-icon {{if prop.compare_options === 'eq'}}tree-plus{{else}}tree-minus{{/if}}" data-icon-path="{{:key}}"></i>
@@ -144,6 +145,49 @@
         {{props prop.data}} {{include tmpl = "#tree_right" /}} {{/props}}
     </div>
 </div>
+    {{/if}}
+{{else}}
+    {{if prop.type === "text"}}
+<div class="tree-item add">
+    <div class="tree-item-name">
+        <i class="ace-icon ace-icon"></i> {{:key}}:
+        <span class="data-text">{{:prop.data}}</span>
+    </div>
+</div>
+    {{else prop.type === "object" || prop.type === "list"}}
+<div class="tree-folder add" data-path="{{:key}}">
+    <div class="tree-folder-header">
+        <i class="ace-icon tree-minus" data-icon-path="{{:key}}"></i>
+        <div class="tree-folder-name">
+            <span style="font-weight: bold">{{:key}}</span>
+        </div>
+    </div>
+    <div class="tree-folder-content">
+        {{props prop.data}} {{include tmpl = "#tree_right" /}} {{/props}}
+    </div>
+</div>
+    {{/if}}
+
+    {{if prop.type1 === "text"}}
+<div class="tree-item del">
+    <div class="tree-item-name">
+        <i class="ace-icon ace-icon"></i> {{:key}}:
+        <span class="data-text">{{:prop.data1}}</span>
+    </div>
+</div>
+    {{else prop.type1 === "object" || prop.type1 === "list"}}
+<div class="tree-folder del" data-path="{{:key}}">
+    <div class="tree-folder-header">
+        <i class="ace-icon tree-minus" data-icon-path="{{:key}}"></i>
+        <div class="tree-folder-name">
+            <span style="font-weight: bold">{{:key}}</span>
+        </div>
+    </div>
+    <div class="tree-folder-content">
+        {{props prop.data1}} {{include tmpl = "#tree_right" /}} {{/props}}
+    </div>
+</div>
+    {{/if}}
 {{/if}}
 </script>
 <script type="text/x-jsrender" id="html_right">
@@ -151,30 +195,31 @@
 </script>
 
 <script type="text/x-jsrender" id="tree_left">
-{{if prop.type === "text"}}
-	{{if prop.compare_options === "mod"}}
+{{if prop.compare_options !== "type_mod"}}
+    {{if prop.type === "text"}}
+    	{{if prop.compare_options === "mod"}}
 <div class="tree-item {{:prop.compare_options}}">
 	<div class="tree-item-name">
         <i class="ace-icon ace-icon"></i> {{:key}}:
         <span class="data-text">{{:prop.data1}}</span>
     </div>
 </div>
-    {{else prop.compare_options === "add"}}
+        {{else prop.compare_options === "add"}}
 <div class="tree-item {{:prop.compare_options}}">
     <div class="tree-item-name">
         <i class="ace-icon ace-icon"></i>
         <span class="data-text">这里米有数据哦</span>
     </div>
 </div>
-	{{else}}
+	   {{else}}
 <div class="tree-item {{:prop.compare_options}}">
 	<div class="tree-item-name">
         <i class="ace-icon ace-icon"></i> {{:key}}:
         <span class="data-text">{{:prop.data}}</span>
     </div>
 </div>
-    {{/if}}
-{{else prop.type === "object" || prop.type === "list"}}
+        {{/if}}
+    {{else prop.type === "object" || prop.type === "list"}}
 <div class="tree-folder {{:prop.compare_options}} {{if prop.compare_options === 'eq'}}closed{{/if}}" data-path="{{:key}}">
     <div class="tree-folder-header">
         <i class="ace-icon {{if prop.compare_options === 'eq'}}tree-plus{{else}}tree-minus{{/if}}" data-icon-path="{{:key}}"></i>
@@ -186,6 +231,50 @@
         {{props prop.data}} {{include tmpl = "#tree_left" /}} {{/props}}
     </div>
 </div>
+    {{/if}}
+{{else}}
+    {{if prop.type === "text"}}
+<div class="tree-item add">
+    <div class="tree-item-name">
+        <i class="ace-icon ace-icon"></i> {{:key}}:
+        <span class="data-text">{{:prop.data}}</span>
+    </div>
+</div>
+    {{else prop.type === "object" || prop.type === "list"}}
+<div class="tree-folder add" data-path="{{:key}}">
+    <div class="tree-folder-header">
+        <i class="ace-icon {{if prop.compare_options === 'eq'}}tree-plus{{else}}tree-minus{{/if}}" data-icon-path="{{:key}}"></i>
+        <div class="tree-folder-name">
+            <span style="font-weight: bold">{{:key}}</span>
+        </div>
+    </div>
+    <div class="tree-folder-content">
+        {{props prop.data}} {{include tmpl = "#tree_left" /}} {{/props}}
+    </div>
+</div>
+    {{/if}}
+
+
+    {{if prop.type1 === "text"}}
+<div class="tree-item del">
+    <div class="tree-item-name">
+        <i class="ace-icon ace-icon"></i> {{:key}}:
+        <span class="data-text">{{:prop.data1}}</span>
+    </div>
+</div>
+    {{else prop.type1 === "object" || prop.type1 === "list"}}
+<div class="tree-folder del" data-path="{{:key}}">
+    <div class="tree-folder-header">
+        <i class="ace-icon {{if prop.compare_options === 'eq'}}tree-plus{{else}}tree-minus{{/if}}" data-icon-path="{{:key}}"></i>
+        <div class="tree-folder-name">
+            <span style="font-weight: bold">{{:key}}</span>
+        </div>
+    </div>
+    <div class="tree-folder-content">
+        {{props prop.data1}} {{include tmpl = "#tree_left" /}} {{/props}}
+    </div>
+</div>
+    {{/if}}
 {{/if}}
 </script>
 <script type="text/x-jsrender" id="html_left">
@@ -196,14 +285,15 @@
 
 <!--背景模板 -->
 <script type="text/x-jsrender" id="tree_bg">
-{{if prop.type === "text"}}
+{{if prop.compare_options !== "type_mod"}}
+    {{if prop.type === "text"}}
 <div class="tree-item {{:prop.compare_options}}">
 	<div class="tree-item-name">
         <i class="ace-icon ace-icon"></i>
         <span class="data-text"></span>
     </div>
 </div>
-{{else prop.type === "object" || prop.type === "list"}}
+    {{else prop.type === "object" || prop.type === "list"}}
 <div class="tree-folder {{:prop.compare_options}} {{if prop.compare_options === 'eq'}}closed{{/if}}" data-path="{{:key}}">
     <div class="tree-folder-header {{:prop.compare_options}}">
         <i class="ace-icon hide {{if prop.compare_options === 'eq'}}tree-plus{{else}}tree-minus{{/if}}" data-icon-path="{{:key}}"></i>
@@ -215,6 +305,49 @@
         {{props prop.data}} {{include tmpl = "#tree_bg" /}} {{/props}}
     </div>
 </div>
+    {{/if}}
+{{else}}
+    {{if prop.type === "text"}}
+<div class="tree-item add">
+    <div class="tree-item-name">
+        <i class="ace-icon ace-icon"></i>
+        <span class="data-text"></span>
+    </div>
+</div>
+    {{else prop.type === "object" || prop.type === "list"}}
+<div class="tree-folder add" data-path="{{:key}}">
+    <div class="tree-folder-header add">
+        <i class="ace-icon hide tree-minus" data-icon-path="{{:key}}"></i>
+        <div class="tree-folder-name">
+            <span style="font-weight: bold"></span>
+        </div>
+    </div>
+    <div class="tree-folder-content">
+        {{props prop.data}} {{include tmpl = "#tree_bg" /}} {{/props}}
+    </div>
+</div>
+    {{/if}}
+
+    {{if prop.type1 === "text"}}
+<div class="tree-item del">
+    <div class="tree-item-name">
+        <i class="ace-icon ace-icon"></i>
+        <span class="data-text"></span>
+    </div>
+</div>
+    {{else prop.type1 === "object" || prop.type1 === "list"}}
+<div class="tree-folder del" data-path="{{:key}}">
+    <div class="tree-folder-header del">
+        <i class="ace-icon hide tree-minus" data-icon-path="{{:key}}"></i>
+        <div class="tree-folder-name">
+            <span style="font-weight: bold"></span>
+        </div>
+    </div>
+    <div class="tree-folder-content">
+        {{props prop.data1}} {{include tmpl = "#tree_bg" /}} {{/props}}
+    </div>
+</div>
+    {{/if}}
 {{/if}}
 </script>
 <script type="text/x-jsrender" id="html_bg">

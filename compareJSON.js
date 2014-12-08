@@ -174,8 +174,17 @@ var obj1 = {
 					"data": "Tom"
 				},
 				{
-					"type": "text",
-					"data": "Jack"
+					"type": "list",
+					"data": [{
+						"type": "text",
+						"data": "Chenglee"
+					}, {
+						"type": "text",
+						"data": "JAck"
+					}, {
+						"type": "text",
+						"data": "Cherry"
+					}]
 				}
 			]
 		},
