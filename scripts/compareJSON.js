@@ -109,7 +109,12 @@ function _compareJSON(obj_rev, obj1, obj2) {
 				obj_rev.data = copyJSON(obj2.data);
 				obj_rev.data = obj_rev.data.concat(copyJSON(obj1.data.slice(obj2.data.length)));
 				for(var i = 0; i < min_len; i++) {
-					_compareJSON(obj_rev.data[i], obj1.data[i], obj2.data[i]);
+					if(equalJSON(obj1.data[i], obj2.data[i]))
+						obj_rev.data[i].compare_options = "eq";
+					else {
+						obj_rev.data[i].compare_options = "mod";
+						_compareJSON(obj_rev.data[i], obj1.data[i], obj2.data[i]);
+					}
 				}
 				if(obj2.data.length === max_len) {
 					for(var i = min_len; i < max_len; i++) {
@@ -122,6 +127,14 @@ function _compareJSON(obj_rev, obj1, obj2) {
 				}
 			} break;
 			case "text": {
+				if(obj1.data === obj2.data) {
+					obj_rev.compare_options = "eq";
+				} else {
+					obj_rev.compare_options = "mod";
+					obj_rev.data1 = obj1.data;
+				}
+			} break;
+			case "xml": {
 				if(obj1.data === obj2.data) {
 					obj_rev.compare_options = "eq";
 				} else {
@@ -152,8 +165,25 @@ function compareJSON(obj1, obj2) {
 			obj_rev[prop] = copyJSON(obj1[prop]);
 			obj_rev[prop].compare_options = "del";
 		} else {
-			extendJSON(obj_rev, obj1[prop], obj2[prop]);
-			_compareJSON(obj_rev, obj1[prop], obj2[prop]);
+			if(obj1[prop].type !== obj2[prop].type) {
+				obj_rev[prop] = {};
+				obj_rev[prop].type = obj2[prop].type;
+				obj_rev[prop].data = obj2[prop].data;
+				obj_rev[prop].type1 = obj1[prop].type;
+				obj_rev[prop].data1 = obj1[prop].data;
+			} else {
+				if(equalJSON(obj1[prop], obj2[prop])) {
+					obj_rev[prop] = {};
+					obj_rev[prop].compare_options = "eq";
+					extendJSON(obj_rev[prop], obj1[prop], obj2[prop]);
+					_compareJSON(obj_rev[prop], obj1[prop], obj2[prop]);
+				} else {
+					obj_rev[prop] = {};
+					obj_rev[prop].compare_options = "mod";
+					extendJSON(obj_rev[prop], obj1[prop], obj2[prop]);
+					_compareJSON(obj_rev[prop], obj1[prop], obj2[prop]);
+				}
+			}
 		}
 	}
 	return obj_rev;
@@ -257,11 +287,11 @@ var obj1 = {
 			"data": {
 				"data for test": {
 					"type": "text",
-					"data": "DAtA FOR TEST"
+					"data": "This is a new file. You can read it but do not rewrite it!!"
 				},
 				"data for test33": {
-					"type": "text",
-					"data": "DAtA FOR TEST33"
+					"type": "xml",
+					"data": '<?xmlf version="1.0" encffoding="UTF-8"?> <!DOCTYPE xhtml PUBLIC "-//WAPFORUM//DTD XHTML Mobile 1.0//EN" "http://www.wapforum.org/DTD/xhtml-mobile10.dtd"> <html xmlns="http://www.w3.org/1999/xhtml">  <head> <title>UC Browfffser</title> </head>  <body> <ucf type="show_site_bar" value="ext:lp:lp_navi"></ucf> <ucf type="show_model" value="search_box"></ucf> <ucf type="show_model" value="url_box"></ucf></body></html>'
 				}
 			}
 		}
@@ -344,50 +374,54 @@ var obj2 = {
 			"data": {
 				"data for test": {
 					"type": "text",
-					"data": "DATA FOR TEST"
+					"data": "This is a old file. You can read it and you u can read it and you u can read it and you can rewrite it!! If you rewrite it, please note it so that we can know the details."
+				},
+				"data for test33": {
+					"type": "xml",
+					"data": '<?xml versffion="1.0" encoding="UTF-8"?> <!DOCTYPE xhtml PUBLIC "-//WAPFORUM//DTD XHTML Mobile 1.0//EN" "http://www.wapforum.org/DTD/xhtml-mobile10.dtd"> <html xmlns="http://www.w3.org/1999/xhtml">  <head> <title>UC Browser</title> </head>  <body> <ucf type="show_site_bar" value="ext:lp:lp_navi"></ucf> <ucf type="show_model" value="search_box"></ucf> <ucf type="show_model" value="url_box"></ucf></body></html>'
 				}
 			}
 		}
 	}
 };
 
-var obj = [
-	{
-		"name": "Chenglee",
-		"age": 22,
-		"sex": "male"
-	},
-	{
-		"name": "Cherlse",
-		"age": 23,
-		"sex": "male"
-	},
-	{
-		"name": "Huangying",
-		"age": 22,
-		"sex": "female",
-		"friends": [
-			{
-				"name": "Wuyanman",
-				"sex": "female",
-				"interest": [
-					"swimming",
-					"yoga",
-					"fighting"
-				]
-			},
-			{
-				"name": "Zhuer",
-				"sex": "female",
-				"interest": [
-					"Make",
-					"yoga",
-					"Sxx"
-				]
-			}
-		]
-	}
-];
+// var obj = [
+// 	{
+// 		"name": "Chenglee",
+// 		"age": 22,
+// 		"sex": "male"
+// 	},
+// 	{
+// 		"name": "Cherlse",
+// 		"age": 23,
+// 		"sex": "male"
+// 	},
+// 	{
+// 		"name": "Huangying",
+// 		"age": 22,
+// 		"sex": "female",
+// 		"friends": [
+// 			{
+// 				"name": "Wuyanman",
+// 				"sex": "female",
+// 				"interest": [
+// 					"swimming",
+// 					"yoga",
+// 					"fighting"
+// 				]
+// 			},
+// 			{
+// 				"name": "Zhuer",
+// 				"sex": "female",
+// 				"interest": [
+// 					"Make",
+// 					"yoga",
+// 					"Sxx"
+// 				]
+// 			}
+// 		]
+// 	}
+// ];
 
 function type(arg) {
 	if(arg instanceof Array) return "array";
@@ -452,6 +486,41 @@ function getPath($ele) {
 	}
 	return ary.join(" ");
 }
+
+function formatXml(xml) {
+	var formatted, pad, reg;
+	formatted = '';
+	reg = /(>) *(<)(\/*)/g;
+	xml = xml.replace(reg, '$1\n$2$3');
+	xml = xml.replace(/(\/)( *)(>)/g, '$1$3\n');
+	xml = xml.replace(/\n{2,}/g, '\n');
+	xml = xml.replace(/\"/g, "'");
+	pad = 0;
+	$.each(xml.split('\n'), function(index, node) {
+		var i, indent, padding, _i;
+		indent = 0;
+		if (node.match(/.+<\/\w[^>]*>$/)) {
+			indent = 0;
+		} else if (node.match(/^<\/\w/)) {
+			if (pad !== 0) {
+				pad -= 1;
+			}
+		} else if (node.match(/^<\w[^>]*[^\/]>.*$/)) {
+			indent = 1;
+		} else {
+			indent = 0;
+		}
+		padding = '';
+		for (i = _i = 0; 0 <= pad ? _i < pad : _i > pad; i = 0 <= pad ? ++_i : --_i) {
+			padding += '  ';
+		}
+		formatted += padding + node + '\n';
+		return pad += indent;
+	});
+	formatted = formatted.replace(/>/g, "&gt");
+	formatted = formatted.replace(/</g, "&lt");
+	return formatted;
+};
 // console.log(obj);
 // console.log(json2Str(obj));
 // console.log(json2Str(obj1));
@@ -466,8 +535,13 @@ function getPath($ele) {
 // console.log(co);
 // console.log(copyJSON(obj1));
 // console.log(copyJSON(obj2));
-
-var obj = {};
-extendJSON(obj, obj1, obj2);
-_compareJSON(obj, obj1, obj2);
+// var obj1 = {"type":"object","data":{"PbUcParam":{"type":"object","data":{"items":{"type":"list","data":[{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"calluc_chk_url"},"pvalue":{"type":"text","data":"http://125.91.5.45:8000/chkdomain.php?uc_param_str=dnfrve"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"navi_icon_addr"},"pvalue":{"type":"text","data":"http://mynavi.ucweb.com/geticon.php"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"ft_share"},"pvalue":{"type":"text","data":"http://share.ucweb.com/share/share/index?uc_param_str=bidnfrpflassve"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"Voice_Address"},"pvalue":{"type":"text","data":"http://us.vocmd.ucweb.com/mimi"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"uc_siri"},"pvalue":{"type":"text","data":"http://us.vocmd.ucweb.com/mimi"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"intl_rss_new"},"pvalue":{"type":"text","data":"http://read.ucweb.com/rss_reader/rss_reader/index?uc_param_str=frvednbilanacp"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"intl_rss_home"},"pvalue":{"type":"text","data":"http://read.ucweb.com/rss_reader/rss_reader/index?uc_param_str=dn"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"intl_rss_channels"},"pvalue":{"type":"text","data":"http://read.ucweb.com/rss_reader/rss_reader/channels?uc_param_str=dn"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"advise_menu"},"pvalue":{"type":"text","data":"http://feedback.uc.cn/self_service/wap/index?instance=EN&uc_param_str=einibicppfmivefrsiutla"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"uclx_server_addr"},"pvalue":{"type":"text","data":"http://us.uclx.ucweb.com:8097/uclx_agent/"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"flag_client_info"},"pvalue":{"type":"text","data":"on"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"Default_Home_Screen"},"pvalue":{"type":"text","data":"1"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"op_regserver_url"},"pvalue":{"type":"text","data":"http://api.open.uc.cn/cas/ucbrowser/register?register_type=email&client_id=73&uc_param_str=frpfvesscpmilaprnisieiut"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"op_loginserver_url"},"pvalue":{"type":"text","data":"http://api.open.uc.cn/cas.clientLogin"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"op_forgetpsw_url"},"pvalue":{"type":"text","data":"http://id.uc.cn/security/forgotpassword/index?uc_param_str=nieisivefrpfbimilaprligiwiut&appId=73"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"op_logout_url"},"pvalue":{"type":"text","data":"http://api.open.uc.cn/cas.clientLogout"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"op_useracnt_url"},"pvalue":{"type":"text","data":"http://api.open.uc.cn/cas/?uc_param_str=frpfvesscpmilaprnisieiutst&target_client_id=4&target_redirect_uri=http%3A%2F%2Fid.uc.cn%2F%3Fuc_param_str%3Dfrpfvesscpmilaprnisieiut&client_id=73"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"cloud_help_url"},"pvalue":{"type":"text","data":"http://cloud.ucweb.com/help/sync?display=phone&pl="}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"cloud_server"},"pvalue":{"type":"text","data":"browser.cloud.ucweb.com/sync"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"liteua"},"pvalue":{"type":"text","data":"UCWEB/2.0 (MIDP-2.0; U; Adr 2.3.7; en-US; HUAWEI-U8850) U2/1.0.0 UCBrowser/8.7.0.315 U2/1.0.0 Mobile"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"dl_stat"},"pvalue":{"type":"text","data":"1"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"url_static"},"pvalue":{"type":"text","data":"1"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"addon_api_verify_url"},"pvalue":{"type":"text","data":"http://addon.ucweb.com/api/verify"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"preload_read_mode_whitelist_switch"},"pvalue":{"type":"text","data":"1"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"vip_download_interurl1"},"pvalue":{"type":"text","data":"http://en.ucsec1.ucweb.com"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"vip_download_interurl2"},"pvalue":{"type":"text","data":"http://en.ucsec2.ucweb.com"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"u3_smemopt"},"pvalue":{"type":"text","data":"1"}}}]}}}}};
+// var obj2 = {"type":"object","data":{"PbUcParam":{"type":"object","data":{"items":{"type":"list","data":[{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"calluc_chk_url"},"pvalue":{"type":"text","data":"http://125.91.5.45:8000/chkdomain.php?uc_param_str=dnfrve"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"navi_icon_addr"},"pvalue":{"type":"text","data":"http://mynavi.ucweb.com/geticon.php"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"ft_share"},"pvalue":{"type":"text","data":"http://share.ucweb.com/share/share/index?uc_param_str=bidnfrpflassve"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"Voice_Address"},"pvalue":{"type":"text","data":"http://us.vocmd.ucweb.com/mimi"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"uc_siri"},"pvalue":{"type":"text","data":"http://us.vocmd.ucweb.com/mimi"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"intl_rss_new"},"pvalue":{"type":"text","data":"http://read.ucweb.com/rss_reader/rss_reader/index?uc_param_str=frvednbilanacp"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"intl_rss_home"},"pvalue":{"type":"text","data":"http://read.ucweb.com/rss_reader/rss_reader/index?uc_param_str=dn"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"intl_rss_channels"},"pvalue":{"type":"text","data":"http://read.ucweb.com/rss_reader/rss_reader/channels?uc_param_str=dn"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"advise_menu"},"pvalue":{"type":"text","data":"http://feedback.uc.cn/self_service/wap/index?instance=EN&uc_param_str=einibicppfmivefrsiutla"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"uclx_server_addr"},"pvalue":{"type":"text","data":"http://us.uclx.ucweb.com:8097/uclx_agent/"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"flag_client_info"},"pvalue":{"type":"text","data":"on"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"Default_Home_Screen"},"pvalue":{"type":"text","data":"1"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"op_regserver_url"},"pvalue":{"type":"text","data":"http://api.open.uc.cn/cas/ucbrowser/register?register_type=email&client_id=73&uc_param_str=frpfvesscpmilaprnisieiut"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"op_loginserver_url"},"pvalue":{"type":"text","data":"http://api.open.uc.cn/cas.clientLogin"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"op_forgetpsw_url"},"pvalue":{"type":"text","data":"http://id.uc.cn/security/forgotpassword/index?uc_param_str=nieisivefrpfbimilaprligiwiut&appId=73"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"op_logout_url"},"pvalue":{"type":"text","data":"http://api.open.uc.cn/cas.clientLogout"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"op_useracnt_url"},"pvalue":{"type":"text","data":"http://api.open.uc.cn/cas/?uc_param_str=frpfvesscpmilaprnisieiutst&target_client_id=4&target_redirect_uri=http%3A%2F%2Fid.uc.cn%2F%3Fuc_param_str%3Dfrpfvesscpmilaprnisieiut&client_id=73"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"cloud_help_url"},"pvalue":{"type":"text","data":"http://cloud.ucweb.com/help/sync?display=phone&pl="}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"cloud_server"},"pvalue":{"type":"text","data":"browser.cloud.ucweb.com/sync"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"liteua"},"pvalue":{"type":"text","data":"UCWEB/2.0 (MIDP-2.0; U; Adr 2.3.7; en-US; HUAWEI-U8850) U2/1.0.0 UCBrowser/8.7.0.315 U2/1.0.0 Mobile"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"dl_stat"},"pvalue":{"type":"text","data":"1"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"url_static"},"pvalue":{"type":"text","data":"1"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"addon_api_verify_url"},"pvalue":{"type":"text","data":"http://addon.ucweb.com/api/verify"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"preload_read_mode_whitelist_switch"},"pvalue":{"type":"text","data":"1"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"vip_download_interurl1"},"pvalue":{"type":"text","data":"http://en.ucsec1.ucweb.com"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"vip_download_interurl2"},"pvalue":{"type":"text","data":"http://en.ucsec2.ucweb.com"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"u3_smemopt"},"pvalue":{"type":"text","data":"1"}}}]}}}}};
+// var obj = {};
+// extendJSON(obj, obj1, obj2);
+// _compareJSON(obj, obj1, obj2);
+// console.log(json2Str(obj));
+var obj1 = {"PbUcParam":{"type":"object","data":{"items":{"type":"list","data":[{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"calluc_chk_url"},"pvalue":{"type":"text","data":"http://125.91.5.45:8000/chkdomain.php?uc_param_str=dnfrve"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"navi_icon_addr"},"pvalue":{"type":"text","data":"http://mynavi.ucweb.com/geticon.php"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"ft_share"},"pvalue":{"type":"text","data":"http://share.ucweb.com/share/share/index?uc_param_str=bidnfrpflassve"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"Voice_Address"},"pvalue":{"type":"text","data":"http://us.vocmd.ucweb.com/mimi"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"uc_siri"},"pvalue":{"type":"text","data":"http://us.vocmd.ucweb.com/mimi"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"intl_rss_new"},"pvalue":{"type":"text","data":"http://read.ucweb.com/rss_reader/rss_reader/index?uc_param_str=frvednbilanacp"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"intl_rss_home"},"pvalue":{"type":"text","data":"http://read.ucweb.com/rss_reader/rss_reader/index?uc_param_str=dn"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"intl_rss_channels"},"pvalue":{"type":"text","data":"http://read.ucweb.com/rss_reader/rss_reader/channels?uc_param_str=dn"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"advise_menu"},"pvalue":{"type":"text","data":"http://feedback.uc.cn/self_service/wap/index?instance=EN&uc_param_str=einibicppfmivefrsiutla"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"uclx_server_addr"},"pvalue":{"type":"text","data":"http://us.uclx.ucweb.com:8097/uclx_agent/"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"flag_client_info"},"pvalue":{"type":"text","data":"on"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"Default_Home_Screen"},"pvalue":{"type":"text","data":"1"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"op_regserver_url"},"pvalue":{"type":"text","data":"http://api.open.uc.cn/cas/ucbrowser/register?register_type=email&client_id=73&uc_param_str=frpfvesscpmilaprnisieiut"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"op_loginserver_url"},"pvalue":{"type":"text","data":"http://api.open.uc.cn/cas.clientLogin"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"op_forgetpsw_url"},"pvalue":{"type":"text","data":"http://id.uc.cn/security/forgotpassword/index?uc_param_str=nieisivefrpfbimilaprligiwiut&appId=73"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"op_logout_url"},"pvalue":{"type":"text","data":"http://api.open.uc.cn/cas.clientLogout"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"op_useracnt_url"},"pvalue":{"type":"text","data":"http://api.open.uc.cn/cas/?uc_param_str=frpfvesscpmilaprnisieiutst&target_client_id=4&target_redirect_uri=http%3A%2F%2Fid.uc.cn%2F%3Fuc_param_str%3Dfrpfvesscpmilaprnisieiut&client_id=73"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"cloud_help_url"},"pvalue":{"type":"text","data":"http://cloud.ucweb.com/help/sync?display=phone&pl="}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"cloud_server"},"pvalue":{"type":"text","data":"browser.cloud.ucweb.com/sync"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"liteua"},"pvalue":{"type":"text","data":"UCWEB/2.0 (MIDP-2.0; U; Adr 2.3.7; en-US; HUAWEI-U8850) U2/1.0.0 UCBrowser/8.7.0.315 U2/1.0.0 Mobile"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"dl_stat"},"pvalue":{"type":"text","data":"1"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"url_static"},"pvalue":{"type":"text","data":"1"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"addon_api_verify_url"},"pvalue":{"type":"text","data":"http://addon.ucweb.com/api/verify"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"preload_read_mode_whitelist_switch"},"pvalue":{"type":"text","data":"1"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"vip_download_interurl1"},"pvalue":{"type":"text","data":"http://en.ucsec1.ucweb.com"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"vip_download_interurl2"},"pvalue":{"type":"text","data":"http://en.ucsec2.ucweb.com"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"u3_smemopt"},"pvalue":{"type":"text","data":"1"}}}]}}}};
+var obj2 = {"PbUcParam":{"type":"object","data":{"items":{"type":"list","data":[{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"calluc_chk_url"},"pvalue":{"type":"text","data":"http://125.91.5.45:8000/chkdomain.php?uc_param_str=dnfrve"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"navi_icon_addr"},"pvalue":{"type":"text","data":"http://mynavi.ucweb.com/geticon.php"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"ft_share"},"pvalue":{"type":"text","data":"http://share.ucweb.com/share/share/index?uc_param_str=bidnfrpflassve"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"Voice_Address"},"pvalue":{"type":"text","data":"http://us.vocmd.ucweb.com/mimi"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"uc_siri"},"pvalue":{"type":"text","data":"http://us.vocmd.ucweb.com/mimi"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"intl_rss_new"},"pvalue":{"type":"text","data":"http://read.ucweb.com/rss_reader/rss_reader/index?uc_param_str=frvednbilanacp"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"intl_rss_home"},"pvalue":{"type":"text","data":"http://read.ucweb.com/rss_reader/rss_reader/index?uc_param_str=dn"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"intl_rss_channels"},"pvalue":{"type":"text","data":"http://read.ucweb.com/rss_reader/rss_reader/channels?uc_param_str=dn"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"advise_menu"},"pvalue":{"type":"text","data":"http://feedback.uc.cn/self_service/wap/index?instance=EN&uc_param_str=einibicppfmivefrsiutla"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"uclx_server_addr"},"pvalue":{"type":"text","data":"http://us.uclx.ucweb.com:8097/uclx_agent/"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"flag_client_info"},"pvalue":{"type":"text","data":"on"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"Default_Home_Screen"},"pvalue":{"type":"text","data":"1"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"op_regserver_url"},"pvalue":{"type":"text","data":"http://api.open.uc.cn/cas/ucbrowser/register?register_type=email&client_id=73&uc_param_str=frpfvesscpmilaprnisieiut"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"op_loginserver_url"},"pvalue":{"type":"text","data":"http://api.open.uc.cn/cas.clientLogin"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"op_forgetpsw_url"},"pvalue":{"type":"text","data":"http://id.uc.cn/security/forgotpassword/index?uc_param_str=nieisivefrpfbimilaprligiwiut&appId=73"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"op_logout_url"},"pvalue":{"type":"text","data":"http://api.open.uc.cn/cas.clientLogout"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"op_useracnt_url"},"pvalue":{"type":"text","data":"http://api.open.uc.cn/cas/?uc_param_str=frpfvesscpmilaprnisieiutst&target_client_id=4&target_redirect_uri=http%3A%2F%2Fid.uc.cn%2F%3Fuc_param_str%3Dfrpfvesscpmilaprnisieiut&client_id=73"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"cloud_help_url"},"pvalue":{"type":"text","data":"http://cloud.ucweb.com/help/sync?display=phone&pl="}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"cloud_server"},"pvalue":{"type":"text","data":"browser.cloud.ucweb.com/sync"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"liteua"},"pvalue":{"type":"text","data":"UCWEB/2.0 (MIDP-2.0; U; Adr 2.3.7; en-US; HUAWEI-U8850) U2/1.0.0 UCBrowser/8.7.0.315 U2/1.0.0 Mobile"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"dl_stat"},"pvalue":{"type":"text","data":"1"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"url_static"},"pvalue":{"type":"text","data":"1"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"addon_api_verify_url"},"pvalue":{"type":"text","data":"http://addon.ucweb.com/api/verify"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"preload_read_mode_whitelist_switch"},"pvalue":{"type":"text","data":"1"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"vip_download_interurl1"},"pvalue":{"type":"text","data":"http://en.ucsec1.ucweb.com"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"vip_download_interurl2"},"pvalue":{"type":"text","data":"http://en.ucsec2.ucweb.com"}}},{"type":"object","data":{"ptype":{"type":"text","data":" "},"pname":{"type":"text","data":"u3_smemopt"},"pvalue":{"type":"text","data":"1"}}}]}}}};
+var obj = compareJSON(obj1, obj2);
 console.log(json2Str(obj));

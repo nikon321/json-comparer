@@ -4,9 +4,12 @@
 <title>Test</title>
 <meta charset="utf-8" />
 <link rel="stylesheet" type="text/css" href="styles/ace.min.css">
-<script type="text/javascript" src="scripts/jquery.js"></script>
+<link rel="stylesheet" type="text/css" href="styles/bootstrap.min.css">
 <script type="text/javascript" src="scripts/compareJSON.js"></script>
+<script type="text/javascript" src="scripts/jquery.js"></script>
+<script type="text/javascript" src="scripts/bootstrap.min.js"></script>
 <script type="text/javascript" src="scripts/jsrender.min.js"></script>
+<script type="text/javascript" src="scripts/jsdiff.js"></script>
 <style type="text/css">
 .left,
 .right {
@@ -15,6 +18,7 @@
     background-color: rgba(0, 0, 0, 0);
     position: relative;
 }
+
 .left .bg .add,
 .left .bg .add .tree-item,
 .left .bg .add .tree-folder-name,
@@ -46,13 +50,13 @@
     background-color: #ddd;
 }
 .right .del,
-.left .add {
+.right .del * {
 	color: gray;
 	text-decoration: line-through;
 }
 .left .mod,
 .right .mod {
-	color: red;
+	color: #c9284d;
 }
 
 .tree .tree-folder .tree-folder-header:hover,
@@ -118,6 +122,34 @@
     clear: both;
 }
 /*****************************************************/
+.tree .tree-item-name {
+    display: inline-block !important;
+    *display: inline;
+    *zoom: 1;
+    max-width: 100%;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+#text_compare {
+    white-space: pre-wrap;
+}
+#text_compare pre {
+    margin: 0;
+    padding: 0;
+    border: none;
+    background-color: white;
+}
+#text_compare ins {
+    padding: 4px 0;
+    text-decoration: none;
+    background-color: #CFD;
+}
+#text_compare del {
+    padding: 4px 0;
+    text-decoration: none;
+    background-color: #FDD;
+}
 .hide {
     display: none !important;
 }
@@ -126,17 +158,17 @@
 <body>
 <script type="text/x-jsrender" id="tree_right">
 {{if prop.compare_options !== "type_mod"}}
-    {{if prop.type === "text"}}
+    {{if prop.type === "text" || prop.type === "xml"}}
 <div class="tree-item {{:prop.compare_options}}">
 	<div class="tree-item-name">
         <i class="ace-icon ace-icon"></i> {{:key}}:
-        <span class="data-text">{{:prop.data}}</span>
+        <span data-path="{{:key}}" class="data-{{:prop.type}} {{:prop.compare_options}}">{{>prop.data}}</span>
     </div>
 </div>
     {{else prop.type === "object" || prop.type === "list"}}
-<div class="tree-folder {{:prop.compare_options}} {{if prop.compare_options === 'eq'}}closed{{/if}}" data-path="{{:key}}">
+<div class="tree-folder {{:prop.compare_options}} {{if prop.compare_options === 'eq' || !prop.compare_options}}closed{{/if}}" data-path="{{:key}}">
     <div class="tree-folder-header">
-        <i class="ace-icon {{if prop.compare_options === 'eq'}}tree-plus{{else}}tree-minus{{/if}}" data-icon-path="{{:key}}"></i>
+        <i class="ace-icon {{if prop.compare_options === 'eq' || !prop.compare_options}}tree-plus{{else}}tree-minus{{/if}}" data-icon-path="{{:key}}"></i>
         <div class="tree-folder-name">
             <span style="font-weight: bold">{{:key}}</span>
         </div>
@@ -147,11 +179,11 @@
 </div>
     {{/if}}
 {{else}}
-    {{if prop.type === "text"}}
+    {{if prop.type === "text" || prop.type === "xml"}}
 <div class="tree-item add">
     <div class="tree-item-name">
         <i class="ace-icon ace-icon"></i> {{:key}}:
-        <span class="data-text">{{:prop.data}}</span>
+        <span class="data-{{:prop.type}}">{{>prop.data}}</span>
     </div>
 </div>
     {{else prop.type === "object" || prop.type === "list"}}
@@ -168,11 +200,11 @@
 </div>
     {{/if}}
 
-    {{if prop.type1 === "text"}}
+    {{if prop.type1 === "text" || prop.type1 === "xml"}}
 <div class="tree-item del">
     <div class="tree-item-name">
         <i class="ace-icon ace-icon"></i> {{:key}}:
-        <span class="data-text">{{:prop.data1}}</span>
+        <span class="data-{{:prop.type1}}">{{>prop.data1}}</span>
     </div>
 </div>
     {{else prop.type1 === "object" || prop.type1 === "list"}}
@@ -196,33 +228,33 @@
 
 <script type="text/x-jsrender" id="tree_left">
 {{if prop.compare_options !== "type_mod"}}
-    {{if prop.type === "text"}}
+    {{if prop.type === "text" || prop.type === "xml"}}
     	{{if prop.compare_options === "mod"}}
 <div class="tree-item {{:prop.compare_options}}">
 	<div class="tree-item-name">
         <i class="ace-icon ace-icon"></i> {{:key}}:
-        <span class="data-text">{{:prop.data1}}</span>
+        <span data-path="{{:key}}" class="data-{{:prop.type}} {{:prop.compare_options}}">{{>prop.data1}}</span>
     </div>
 </div>
         {{else prop.compare_options === "add"}}
 <div class="tree-item {{:prop.compare_options}}">
     <div class="tree-item-name">
         <i class="ace-icon ace-icon"></i>
-        <span class="data-text">这里米有数据哦</span>
+        <span><i>这里米有数据哦</i></span>
     </div>
 </div>
 	   {{else}}
 <div class="tree-item {{:prop.compare_options}}">
 	<div class="tree-item-name">
         <i class="ace-icon ace-icon"></i> {{:key}}:
-        <span class="data-text">{{:prop.data}}</span>
+        <span class="data-{{:prop.type}}">{{:prop.data}}</span>
     </div>
 </div>
         {{/if}}
     {{else prop.type === "object" || prop.type === "list"}}
-<div class="tree-folder {{:prop.compare_options}} {{if prop.compare_options === 'eq'}}closed{{/if}}" data-path="{{:key}}">
+<div class="tree-folder {{:prop.compare_options}} {{if prop.compare_options === 'eq' || !prop.compare_options}}closed{{/if}}" data-path="{{:key}}">
     <div class="tree-folder-header">
-        <i class="ace-icon {{if prop.compare_options === 'eq'}}tree-plus{{else}}tree-minus{{/if}}" data-icon-path="{{:key}}"></i>
+        <i class="ace-icon {{if prop.compare_options === 'eq' || !prop.compare_options}}tree-plus{{else}}tree-minus{{/if}}" data-icon-path="{{:key}}"></i>
         <div class="tree-folder-name">
             <span style="font-weight: bold">{{:key}}</span>
         </div>
@@ -233,17 +265,17 @@
 </div>
     {{/if}}
 {{else}}
-    {{if prop.type === "text"}}
+    {{if prop.type === "text" || prop.type === "xml"}}
 <div class="tree-item add">
     <div class="tree-item-name">
-        <i class="ace-icon ace-icon"></i> {{:key}}:
-        <span class="data-text">{{:prop.data}}</span>
+        <i class="ace-icon ace-icon"></i>
+        <span class="data-{{:prop.type}}"><i>这里米有数据哦</i></span>
     </div>
 </div>
     {{else prop.type === "object" || prop.type === "list"}}
 <div class="tree-folder add" data-path="{{:key}}">
     <div class="tree-folder-header">
-        <i class="ace-icon {{if prop.compare_options === 'eq'}}tree-plus{{else}}tree-minus{{/if}}" data-icon-path="{{:key}}"></i>
+        <i class="ace-icon {{if prop.compare_options === 'eq' || !prop.compare_options}}tree-plus{{else}}tree-minus{{/if}}" data-icon-path="{{:key}}"></i>
         <div class="tree-folder-name">
             <span style="font-weight: bold">{{:key}}</span>
         </div>
@@ -255,17 +287,17 @@
     {{/if}}
 
 
-    {{if prop.type1 === "text"}}
+    {{if prop.type1 === "text" || prop.type1 === "xml"}}
 <div class="tree-item del">
     <div class="tree-item-name">
         <i class="ace-icon ace-icon"></i> {{:key}}:
-        <span class="data-text">{{:prop.data1}}</span>
+        <span class="data-{{:prop.type1}}">{{>prop.data1}}</span>
     </div>
 </div>
     {{else prop.type1 === "object" || prop.type1 === "list"}}
 <div class="tree-folder del" data-path="{{:key}}">
     <div class="tree-folder-header">
-        <i class="ace-icon {{if prop.compare_options === 'eq'}}tree-plus{{else}}tree-minus{{/if}}" data-icon-path="{{:key}}"></i>
+        <i class="ace-icon {{if prop.compare_options === 'eq' || !prop.compare_options}}tree-plus{{else}}tree-minus{{/if}}" data-icon-path="{{:key}}"></i>
         <div class="tree-folder-name">
             <span style="font-weight: bold">{{:key}}</span>
         </div>
@@ -282,21 +314,20 @@
 </script>
 
 
-
 <!--背景模板 -->
 <script type="text/x-jsrender" id="tree_bg">
 {{if prop.compare_options !== "type_mod"}}
-    {{if prop.type === "text"}}
+    {{if prop.type === "text" || prop.type === "xml"}}
 <div class="tree-item {{:prop.compare_options}}">
 	<div class="tree-item-name">
         <i class="ace-icon ace-icon"></i>
-        <span class="data-text"></span>
+        <span class="data-{{:prop.type}}"></span>
     </div>
 </div>
     {{else prop.type === "object" || prop.type === "list"}}
-<div class="tree-folder {{:prop.compare_options}} {{if prop.compare_options === 'eq'}}closed{{/if}}" data-path="{{:key}}">
+<div class="tree-folder {{:prop.compare_options}} {{if prop.compare_options === 'eq' || !prop.compare_options}}closed{{/if}}" data-path="{{:key}}">
     <div class="tree-folder-header {{:prop.compare_options}}">
-        <i class="ace-icon hide {{if prop.compare_options === 'eq'}}tree-plus{{else}}tree-minus{{/if}}" data-icon-path="{{:key}}"></i>
+        <i class="ace-icon hide {{if prop.compare_options === 'eq' || !prop.compare_options}}tree-plus{{else}}tree-minus{{/if}}" data-icon-path="{{:key}}"></i>
         <div class="tree-folder-name">
             <span style="font-weight: bold"></span>
         </div>
@@ -307,11 +338,11 @@
 </div>
     {{/if}}
 {{else}}
-    {{if prop.type === "text"}}
+    {{if prop.type === "text" || prop.type === "xml"}}
 <div class="tree-item add">
     <div class="tree-item-name">
         <i class="ace-icon ace-icon"></i>
-        <span class="data-text"></span>
+        <span class="data-{{:prop.type}}"></span>
     </div>
 </div>
     {{else prop.type === "object" || prop.type === "list"}}
@@ -328,11 +359,11 @@
 </div>
     {{/if}}
 
-    {{if prop.type1 === "text"}}
+    {{if prop.type1 === "text" || prop.type1 === "xml"}}
 <div class="tree-item del">
     <div class="tree-item-name">
         <i class="ace-icon ace-icon"></i>
-        <span class="data-text"></span>
+        <span class="data-{{:prop.type1}}"></span>
     </div>
 </div>
     {{else prop.type1 === "object" || prop.type1 === "list"}}
@@ -353,6 +384,16 @@
 <script type="text/x-jsrender" id="html_bg">
 	{{props :}} {{include tmpl = "#tree_bg" /}} {{/props}}
 </script>
+<div id="text_compare_modal" class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-body" id="text_compare">
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+
 <br/>
 <br/>
 <br/>
@@ -415,9 +456,9 @@
     <div class="cliearfix"></div>
 </div>
 <script type="text/javascript">
-obj.test = {};
-obj.test.data = obj.data;
-obj.test.type = obj.type;
+// obj.test = {};
+// obj.test.data = obj.data;
+// obj.test.type = obj.type;
 var text_bg = $.templates("#html_bg").render(obj);
 var text_right = $.templates("#html_right").render(obj);
 var text_left = $.templates("#html_left").render(obj);
@@ -434,14 +475,15 @@ $(".tree-minus, .tree-plus").bind("click", function(event) {
     if($this.hasClass("tree-plus")) {
         type = "plus";
     }
-    eles_sl += ".left " + path  + " [data-icon-path=" + $this.attr("data-icon-path") + "]";
-    eles_sl += ", .right " + path  + " [data-icon-path=" + $this.attr("data-icon-path") + "]";
+    eles_sl += ".left " + path  + " [data-icon-path='" + $this.attr("data-icon-path") + "']";
+    eles_sl += ", .right " + path  + " [data-icon-path='" + $this.attr("data-icon-path") + "']";
     $(eles_sl).parent().toggleClass("closed").next().toggle("hide");
     if(type === "minus") $(eles_sl).removeClass("tree-minus").addClass("tree-plus");
     else if(type === "plus") $(eles_sl).removeClass("tree-plus").addClass("tree-minus");
 });
 
 $("#bu").bind("click", function(event) {
+    $(this).remove();
     $("#main-con").css({
         "position": "fixed",
         "left": 0,
@@ -450,6 +492,44 @@ $("#bu").bind("click", function(event) {
         "bottom": 0,
         "overflow": "auto"
     });
+});
+
+$(".data-text.mod").bind("click", function(event) {
+    var $this = $(this),
+        path = getPath($this),
+        sl_left = ".left " + path + " [data-path='" + $this.attr("data-path") + "']",
+        sl_right = ".right " + path + " [data-path='" + $this.attr("data-path") + "']",
+        text_left = $(sl_left).eq(0).text(),
+        text_right = $(sl_right).eq(0).text(),
+        diff_type = "diffWords",
+        html = "",
+        diff = JsDiff[diff_type](text_right, text_left);
+    diff.forEach(function(val, index, ary) {
+        if(val.added) html += "<ins>" + val.value + "</ins>";
+        else if(val.removed) html += "<del>" + val.value + "</del>";
+        else html += val.value;
+    });
+    $("#text_compare").html(html);
+    $("#text_compare_modal").modal();
+});
+
+$(".data-xml").bind("click", function(event) {
+    var $this = $(this),
+        path = getPath($this),
+        sl_left = ".left " + path + " [data-path='" + $this.attr("data-path") + "']",
+        sl_right = ".right " + path + " [data-path='" + $this.attr("data-path") + "']",
+        text_left = formatXml($(sl_left).eq(0).text()),
+        text_right = formatXml($(sl_right).eq(0).text()),
+        diff_type = "diffWords",
+        html = "",
+        diff = JsDiff[diff_type](text_right, text_left);
+    diff.forEach(function(val, index, ary) {
+        if(val.added) html += "<ins>" + val.value + "</ins>";
+        else if(val.removed) html += "<del>" + val.value + "</del>";
+        else html += val.value;
+    });
+    $("#text_compare").html("<pre>" + html + "</pre>");
+    $("#text_compare_modal").modal();
 });
 </script>
 </body>
