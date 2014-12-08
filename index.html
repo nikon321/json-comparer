@@ -2,531 +2,322 @@
 <html>
 <head>
 <title>Test</title>
+<meta charset="utf-8" />
 <link rel="stylesheet" type="text/css" href="ace.min.css">
 <script type="text/javascript" src="jquery/jquery.js"></script>
 <script type="text/javascript" src="compareJSON.js"></script>
 <script type="text/javascript" src="jsrender.min.js"></script>
+<style type="text/css">
+.left,
+.right {
+	float: left;
+	width: 50%;
+    background-color: rgba(0, 0, 0, 0);
+    position: relative;
+}
+.left .bg .add,
+.left .bg .add .tree-item,
+.left .bg .add .tree-folder-name,
+.right .bg .add,
+.right .bg .add .tree-item,
+.right .bg .add .tree-folder-name {
+    background-color: #CFD;
+}
+.left .add,
+.left .add .tree-item,
+.left .add .tree-folder-name,
+.left .add span {
+    text-decoration: none !important;
+}
+.right .bg .del,
+.right .bg .del .tree-item,
+.right .bg .del .tree-folder-name,
+.left .bg .del,
+.left .bg .del .tree-item,
+.left .bg .del .tree-folder-name {
+    background-color: #FDD;
+}
+.right .bg .tree-item.mod,
+.left .bg .tree-item.mod {
+    background-color: #ddd;
+}
+.left .bg .tree-folder-header.mod.closed,
+.right .bg .tree-folder-header.mod.closed {
+    background-color: #ddd;
+}
+.right .del,
+.left .add {
+	color: gray;
+	text-decoration: line-through;
+}
+.left .mod,
+.right .mod {
+	color: red;
+}
+
+.tree .tree-folder .tree-folder-header:hover,
+.tree .tree-item:hover {
+    background-color: inherit;
+}
+.tree .tree-folder:last-child:after {
+    left: -14px;
+}
+.tree .tree-folder.closed .tree-folder-content {
+    display: none;
+}
+/*
+* override 背景色
+*/
+.left .bg,
+.right .bg {
+	position: absolute;
+	top: 8px;
+	left: 8px;
+	right: 0;
+	bottom: 8px;
+    background-color: #ffecec;
+    z-index: -1;
+}
+.right .widget-main.padding-8 {
+    padding-left: 0;
+}
+.right .bg {
+    left: 0;
+}
+.bg .tree .tree-folder .tree-folder-content {
+	margin-left: 0;
+}
+.bg .widget-main.padding-8,
+.bg .tree {
+	padding: 0;
+}
+.bg .tree:before,
+.bg .tree .tree-folder:before,
+.bg .tree .tree-item:before,
+.bg .tree .tree-folder:last-child:after,
+.tree .tree-folder,
+.tree .tree-item {
+    border: none;
+}
+.tree {
+    margin-left: 8px;
+}
+.bg .tree {
+    margin-left: 0;
+}
+.widget-box {
+    border: none;
+}
+.widget-body {
+    background-color: rgba(0, 0, 0, 0);
+}
+.bg .widget-body {
+    background-color: #fff;
+}
+.cliearfix {
+    clear: both;
+}
+/*****************************************************/
+.hide {
+    display: none !important;
+}
+</style>
 </head>
 <body>
-<script type="text/x-jsrender" id="tree">
+<script type="text/x-jsrender" id="tree_right">
 {{if prop.type === "text"}}
 <div class="tree-item {{:prop.compare_options}}">
 	<div class="tree-item-name">
-        <i class="ace-icon ace-icon fa fa-file-text-o"></i> {{:key}}
-        <i class="ace-icon ace-icon fa fa-arrow-right"></i>
-        <div class="data-text">{{:prop.data}}</div>
+        <i class="ace-icon ace-icon"></i> {{:key}}:
+        <span class="data-text">{{:prop.data}}</span>
     </div>
 </div>
 {{else prop.type === "object" || prop.type === "list"}}
-<div class="tree-folder {{:prop.compare_options}}">
+<div class="tree-folder {{:prop.compare_options}} {{if prop.compare_options === 'eq'}}closed{{/if}}" data-path="{{:key}}">
     <div class="tree-folder-header">
-        <i class="ace-icon tree-minus"></i>
+        <i class="ace-icon {{if prop.compare_options === 'eq'}}tree-plus{{else}}tree-minus{{/if}}" data-icon-path="{{:key}}"></i>
         <div class="tree-folder-name">
-            <span class="badge badge-info" style="font-weight: bold">{{:key}}</span>
+            <span style="font-weight: bold">{{:key}}</span>
         </div>
     </div>
     <div class="tree-folder-content">
-        {{props prop.data}} {{include tmpl = "#tree" /}} {{/props}}
+        {{props prop.data}} {{include tmpl = "#tree_right" /}} {{/props}}
     </div>
 </div>
 {{/if}}
 </script>
-<script type="text/x-jsrender" id="preview_html">
-	{{props :}} {{include tmpl = "#tree" /}} {{/props}}
+<script type="text/x-jsrender" id="html_right">
+	{{props :}} {{include tmpl = "#tree_right" /}} {{/props}}
 </script>
-<div class="tree-con">
+
+<script type="text/x-jsrender" id="tree_left">
+{{if prop.type === "text"}}
+	{{if prop.compare_options === "mod"}}
+<div class="tree-item {{:prop.compare_options}}">
+	<div class="tree-item-name">
+        <i class="ace-icon ace-icon"></i> {{:key}}:
+        <span class="data-text">{{:prop.data1}}</span>
+    </div>
+</div>
+    {{else prop.compare_options === "add"}}
+<div class="tree-item {{:prop.compare_options}}">
+    <div class="tree-item-name">
+        <i class="ace-icon ace-icon"></i>
+        <span class="data-text">这里米有数据哦</span>
+    </div>
+</div>
+	{{else}}
+<div class="tree-item {{:prop.compare_options}}">
+	<div class="tree-item-name">
+        <i class="ace-icon ace-icon"></i> {{:key}}:
+        <span class="data-text">{{:prop.data}}</span>
+    </div>
+</div>
+    {{/if}}
+{{else prop.type === "object" || prop.type === "list"}}
+<div class="tree-folder {{:prop.compare_options}} {{if prop.compare_options === 'eq'}}closed{{/if}}" data-path="{{:key}}">
+    <div class="tree-folder-header">
+        <i class="ace-icon {{if prop.compare_options === 'eq'}}tree-plus{{else}}tree-minus{{/if}}" data-icon-path="{{:key}}"></i>
+        <div class="tree-folder-name">
+            <span style="font-weight: bold">{{:key}}</span>
+        </div>
+    </div>
+    <div class="tree-folder-content">
+        {{props prop.data}} {{include tmpl = "#tree_left" /}} {{/props}}
+    </div>
+</div>
+{{/if}}
+</script>
+<script type="text/x-jsrender" id="html_left">
+	{{props :}} {{include tmpl = "#tree_left" /}} {{/props}}
+</script>
+
+
+
+<!--背景模板 -->
+<script type="text/x-jsrender" id="tree_bg">
+{{if prop.type === "text"}}
+<div class="tree-item {{:prop.compare_options}}">
+	<div class="tree-item-name">
+        <i class="ace-icon ace-icon"></i>
+        <span class="data-text"></span>
+    </div>
+</div>
+{{else prop.type === "object" || prop.type === "list"}}
+<div class="tree-folder {{:prop.compare_options}} {{if prop.compare_options === 'eq'}}closed{{/if}}" data-path="{{:key}}">
+    <div class="tree-folder-header {{:prop.compare_options}}">
+        <i class="ace-icon hide {{if prop.compare_options === 'eq'}}tree-plus{{else}}tree-minus{{/if}}" data-icon-path="{{:key}}"></i>
+        <div class="tree-folder-name">
+            <span style="font-weight: bold"></span>
+        </div>
+    </div>
+    <div class="tree-folder-content">
+        {{props prop.data}} {{include tmpl = "#tree_bg" /}} {{/props}}
+    </div>
+</div>
+{{/if}}
+</script>
+<script type="text/x-jsrender" id="html_bg">
+	{{props :}} {{include tmpl = "#tree_bg" /}} {{/props}}
+</script>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<button id="bu">Full Screen</button>
+<div id="main-con">
 	<div class="left">
-		<div class="tree tree-selectable" id="__tree">
+		<div class="widget-box widget-color-blue2">
+            <div class="widget-body">
+                <div class="widget-main padding-8">
+                    <div class="tree tree-selectable" id="tree_left_con">
+                        <!-- <section ng-repeat="(k, v) in data" ng-include="'tree'" onload="afterRender()"></section> -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+		<div class="widget-box widget-color-blue2 bg">
+            <div class="widget-body">
+                <div class="widget-main padding-8">
+                    <div class="tree tree-selectable" id="tree_left_bg_con">
+                        <!-- <section ng-repeat="(k, v) in data" ng-include="'tree'" onload="afterRender()"></section> -->
+                    </div>
+                </div>
+            </div>
         </div>
 	</div>
-	<div class="right"></div>
+	<div class="right">
+		<div class="widget-box widget-color-blue2">
+            <div class="widget-body">
+                <div class="widget-main padding-8">
+                    <div class="tree tree-selectable" id="tree_right_con">
+                        <!-- <section ng-repeat="(k, v) in data" ng-include="'tree'" onload="afterRender()"></section> -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+		<div class="widget-box widget-color-blue2 bg">
+            <div class="widget-body">
+                <div class="widget-main padding-8">
+                    <div class="tree tree-selectable" id="tree_right_bg_con">
+                        <!-- <section ng-repeat="(k, v) in data" ng-include="'tree'" onload="afterRender()"></section> -->
+                    </div>
+                </div>
+            </div>
+        </div>
+	</div>
+    <div class="cliearfix"></div>
 </div>
 <script type="text/javascript">
-// var obj = {
-// 	type: "object",
-// 	data: {
-// 		"type": "text",
-// 		"data": "ccccc"
-// 	}
-// }
-//console.log(json2Str(obj));
-// var obj = {
-//   "PbUcParam": {
-//     "type": "object",
-//     "data": {
-//       "items": {
-//         "type": "list",
-//         "data": [
-//           {
-//             "type": "object",
-//             "data": {
-//               "ptype": {
-//                 "type": "text",
-//                 "data": " "
-//               },
-//               "pname": {
-//                 "type": "text",
-//                 "data": "calluc_chk_url"
-//               },
-//               "pvalue": {
-//                 "type": "text",
-//                 "data": "http://125.91.5.45:8000/chkdomain.php?uc_param_str=dnfrve"
-//               }
-//             }
-//           },
-//           {
-//             "type": "object",
-//             "data": {
-//               "ptype": {
-//                 "type": "text",
-//                 "data": " "
-//               },
-//               "pname": {
-//                 "type": "text",
-//                 "data": "navi_icon_addr"
-//               },
-//               "pvalue": {
-//                 "type": "text",
-//                 "data": "http://mynavi.ucweb.com/geticon.php"
-//               }
-//             }
-//           },
-//           {
-//             "type": "object",
-//             "data": {
-//               "ptype": {
-//                 "type": "text",
-//                 "data": " "
-//               },
-//               "pname": {
-//                 "type": "text",
-//                 "data": "ft_share"
-//               },
-//               "pvalue": {
-//                 "type": "text",
-//                 "data": "http://share.ucweb.com/share/share/index?uc_param_str=bidnfrpflassve"
-//               }
-//             }
-//           },
-//           {
-//             "type": "object",
-//             "data": {
-//               "ptype": {
-//                 "type": "text",
-//                 "data": " "
-//               },
-//               "pname": {
-//                 "type": "text",
-//                 "data": "Voice_Address"
-//               },
-//               "pvalue": {
-//                 "type": "text",
-//                 "data": "http://us.vocmd.ucweb.com/mimi"
-//               }
-//             }
-//           },
-//           {
-//             "type": "object",
-//             "data": {
-//               "ptype": {
-//                 "type": "text",
-//                 "data": " "
-//               },
-//               "pname": {
-//                 "type": "text",
-//                 "data": "uc_siri"
-//               },
-//               "pvalue": {
-//                 "type": "text",
-//                 "data": "http://us.vocmd.ucweb.com/mimi"
-//               }
-//             }
-//           },
-//           {
-//             "type": "object",
-//             "data": {
-//               "ptype": {
-//                 "type": "text",
-//                 "data": " "
-//               },
-//               "pname": {
-//                 "type": "text",
-//                 "data": "intl_rss_new"
-//               },
-//               "pvalue": {
-//                 "type": "text",
-//                 "data": "http://read.ucweb.com/rss_reader/rss_reader/index?uc_param_str=frvednbilanacp"
-//               }
-//             }
-//           },
-//           {
-//             "type": "object",
-//             "data": {
-//               "ptype": {
-//                 "type": "text",
-//                 "data": " "
-//               },
-//               "pname": {
-//                 "type": "text",
-//                 "data": "intl_rss_home"
-//               },
-//               "pvalue": {
-//                 "type": "text",
-//                 "data": "http://read.ucweb.com/rss_reader/rss_reader/index?uc_param_str=dn"
-//               }
-//             }
-//           },
-//           {
-//             "type": "object",
-//             "data": {
-//               "ptype": {
-//                 "type": "text",
-//                 "data": " "
-//               },
-//               "pname": {
-//                 "type": "text",
-//                 "data": "intl_rss_channels"
-//               },
-//               "pvalue": {
-//                 "type": "text",
-//                 "data": "http://read.ucweb.com/rss_reader/rss_reader/channels?uc_param_str=dn"
-//               }
-//             }
-//           },
-//           {
-//             "type": "object",
-//             "data": {
-//               "ptype": {
-//                 "type": "text",
-//                 "data": " "
-//               },
-//               "pname": {
-//                 "type": "text",
-//                 "data": "advise_menu"
-//               },
-//               "pvalue": {
-//                 "type": "text",
-//                 "data": "http://feedback.uc.cn/self_service/wap/index?instance=EN&uc_param_str=einibicppfmivefrsiutla"
-//               }
-//             }
-//           },
-//           {
-//             "type": "object",
-//             "data": {
-//               "ptype": {
-//                 "type": "text",
-//                 "data": " "
-//               },
-//               "pname": {
-//                 "type": "text",
-//                 "data": "uclx_server_addr"
-//               },
-//               "pvalue": {
-//                 "type": "text",
-//                 "data": "http://us.uclx.ucweb.com:8097/uclx_agent/"
-//               }
-//             }
-//           },
-//           {
-//             "type": "object",
-//             "data": {
-//               "ptype": {
-//                 "type": "text",
-//                 "data": " "
-//               },
-//               "pname": {
-//                 "type": "text",
-//                 "data": "flag_client_info"
-//               },
-//               "pvalue": {
-//                 "type": "text",
-//                 "data": "on"
-//               }
-//             }
-//           },
-//           {
-//             "type": "object",
-//             "data": {
-//               "ptype": {
-//                 "type": "text",
-//                 "data": " "
-//               },
-//               "pname": {
-//                 "type": "text",
-//                 "data": "Default_Home_Screen"
-//               },
-//               "pvalue": {
-//                 "type": "text",
-//                 "data": "1"
-//               }
-//             }
-//           },
-//           {
-//             "type": "object",
-//             "data": {
-//               "ptype": {
-//                 "type": "text",
-//                 "data": " "
-//               },
-//               "pname": {
-//                 "type": "text",
-//                 "data": "op_regserver_url"
-//               },
-//               "pvalue": {
-//                 "type": "text",
-//                 "data": "http://api.open.uc.cn/cas/ucbrowser/register?register_type=email&client_id=73&uc_param_str=frpfvesscpmilaprnisieiut"
-//               }
-//             }
-//           },
-//           {
-//             "type": "object",
-//             "data": {
-//               "ptype": {
-//                 "type": "text",
-//                 "data": " "
-//               },
-//               "pname": {
-//                 "type": "text",
-//                 "data": "op_loginserver_url"
-//               },
-//               "pvalue": {
-//                 "type": "text",
-//                 "data": "http://api.open.uc.cn/cas.clientLogin"
-//               }
-//             }
-//           },
-//           {
-//             "type": "object",
-//             "data": {
-//               "ptype": {
-//                 "type": "text",
-//                 "data": " "
-//               },
-//               "pname": {
-//                 "type": "text",
-//                 "data": "op_forgetpsw_url"
-//               },
-//               "pvalue": {
-//                 "type": "text",
-//                 "data": "http://id.uc.cn/security/forgotpassword/index?uc_param_str=nieisivefrpfbimilaprligiwiut&appId=73"
-//               }
-//             }
-//           },
-//           {
-//             "type": "object",
-//             "data": {
-//               "ptype": {
-//                 "type": "text",
-//                 "data": " "
-//               },
-//               "pname": {
-//                 "type": "text",
-//                 "data": "op_logout_url"
-//               },
-//               "pvalue": {
-//                 "type": "text",
-//                 "data": "http://api.open.uc.cn/cas.clientLogout"
-//               }
-//             }
-//           },
-//           {
-//             "type": "object",
-//             "data": {
-//               "ptype": {
-//                 "type": "text",
-//                 "data": " "
-//               },
-//               "pname": {
-//                 "type": "text",
-//                 "data": "op_useracnt_url"
-//               },
-//               "pvalue": {
-//                 "type": "text",
-//                 "data": "http://api.open.uc.cn/cas/?uc_param_str=frpfvesscpmilaprnisieiutst&target_client_id=4&target_redirect_uri=http%3A%2F%2Fid.uc.cn%2F%3Fuc_param_str%3Dfrpfvesscpmilaprnisieiut&client_id=73"
-//               }
-//             }
-//           },
-//           {
-//             "type": "object",
-//             "data": {
-//               "ptype": {
-//                 "type": "text",
-//                 "data": " "
-//               },
-//               "pname": {
-//                 "type": "text",
-//                 "data": "cloud_help_url"
-//               },
-//               "pvalue": {
-//                 "type": "text",
-//                 "data": "http://cloud.ucweb.com/help/sync?display=phone&pl="
-//               }
-//             }
-//           },
-//           {
-//             "type": "object",
-//             "data": {
-//               "ptype": {
-//                 "type": "text",
-//                 "data": " "
-//               },
-//               "pname": {
-//                 "type": "text",
-//                 "data": "cloud_server"
-//               },
-//               "pvalue": {
-//                 "type": "text",
-//                 "data": "browser.cloud.ucweb.com/sync"
-//               }
-//             }
-//           },
-//           {
-//             "type": "object",
-//             "data": {
-//               "ptype": {
-//                 "type": "text",
-//                 "data": " "
-//               },
-//               "pname": {
-//                 "type": "text",
-//                 "data": "liteua"
-//               },
-//               "pvalue": {
-//                 "type": "text",
-//                 "data": "UCWEB/2.0 (MIDP-2.0; U; Adr 2.3.7; en-US; HUAWEI-U8850) U2/1.0.0 UCBrowser/8.7.0.315 U2/1.0.0 Mobile"
-//               }
-//             }
-//           },
-//           {
-//             "type": "object",
-//             "data": {
-//               "ptype": {
-//                 "type": "text",
-//                 "data": " "
-//               },
-//               "pname": {
-//                 "type": "text",
-//                 "data": "dl_stat"
-//               },
-//               "pvalue": {
-//                 "type": "text",
-//                 "data": "1"
-//               }
-//             }
-//           },
-//           {
-//             "type": "object",
-//             "data": {
-//               "ptype": {
-//                 "type": "text",
-//                 "data": " "
-//               },
-//               "pname": {
-//                 "type": "text",
-//                 "data": "url_static"
-//               },
-//               "pvalue": {
-//                 "type": "text",
-//                 "data": "1"
-//               }
-//             }
-//           },
-//           {
-//             "type": "object",
-//             "data": {
-//               "ptype": {
-//                 "type": "text",
-//                 "data": " "
-//               },
-//               "pname": {
-//                 "type": "text",
-//                 "data": "addon_api_verify_url"
-//               },
-//               "pvalue": {
-//                 "type": "text",
-//                 "data": "http://addon.ucweb.com/api/verify"
-//               }
-//             }
-//           },
-//           {
-//             "type": "object",
-//             "data": {
-//               "ptype": {
-//                 "type": "text",
-//                 "data": " "
-//               },
-//               "pname": {
-//                 "type": "text",
-//                 "data": "preload_read_mode_whitelist_switch"
-//               },
-//               "pvalue": {
-//                 "type": "text",
-//                 "data": "1"
-//               }
-//             }
-//           },
-//           {
-//             "type": "object",
-//             "data": {
-//               "ptype": {
-//                 "type": "text",
-//                 "data": " "
-//               },
-//               "pname": {
-//                 "type": "text",
-//                 "data": "vip_download_interurl1"
-//               },
-//               "pvalue": {
-//                 "type": "text",
-//                 "data": "http://en.ucsec1.ucweb.com"
-//               }
-//             }
-//           },
-//           {
-//             "type": "object",
-//             "data": {
-//               "ptype": {
-//                 "type": "text",
-//                 "data": " "
-//               },
-//               "pname": {
-//                 "type": "text",
-//                 "data": "vip_download_interurl2"
-//               },
-//               "pvalue": {
-//                 "type": "text",
-//                 "data": "http://en.ucsec2.ucweb.com"
-//               }
-//             }
-//           },
-//           {
-//             "type": "object",
-//             "data": {
-//               "ptype": {
-//                 "type": "text",
-//                 "data": " "
-//               },
-//               "pname": {
-//                 "type": "text",
-//                 "data": "u3_smemopt"
-//               },
-//               "pvalue": {
-//                 "type": "text",
-//                 "data": "1"
-//               }
-//             }
-//           }
-//         ]
-//       }
-//     }
-//   }
-// }
 obj.test = {};
 obj.test.data = obj.data;
 obj.test.type = obj.type;
-var text = $.templates("#preview_html").render(obj);
-$("#__tree").html(text);
-console.log(text);
+var text_bg = $.templates("#html_bg").render(obj);
+var text_right = $.templates("#html_right").render(obj);
+var text_left = $.templates("#html_left").render(obj);
+
+$("#tree_right_con").html(text_right);
+$("#tree_left_con").html(text_left);
+$("#tree_left_bg_con, #tree_right_bg_con").html(text_bg);
+
+$(".tree-minus, .tree-plus").bind("click", function(event) {
+    var $this = $(this),
+        path = getPath($this),
+        eles_sl = "",
+        type = "minus";
+    if($this.hasClass("tree-plus")) {
+        type = "plus";
+    }
+    eles_sl += ".left " + path  + " [data-icon-path=" + $this.attr("data-icon-path") + "]";
+    eles_sl += ", .right " + path  + " [data-icon-path=" + $this.attr("data-icon-path") + "]";
+    $(eles_sl).parent().toggleClass("closed").next().toggle("hide");
+    if(type === "minus") $(eles_sl).removeClass("tree-minus").addClass("tree-plus");
+    else if(type === "plus") $(eles_sl).removeClass("tree-plus").addClass("tree-minus");
+});
+
+$("#bu").bind("click", function(event) {
+    $("#main-con").css({
+        "position": "fixed",
+        "left": 0,
+        "right": 0,
+        "top": 0,
+        "bottom": 0,
+        "overflow": "auto"
+    });
+});
 </script>
 </body>
 </html>

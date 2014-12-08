@@ -78,51 +78,7 @@ function extendJSON(obj_rev, obj1, obj2) {
 	}
 }
 
-// function compareJSON(obj_rev, obj1, obj2) {
-// 	//$.extend(true, obj_rev, obj1, obj2);
-// 	//console.log(obj_rev);
-	
-// 	for(var prop in obj_rev) {
-// 		if(prop !== "type") {
-// 			//console.log(prop);
-// 			if(prop in obj2 && !(prop in obj1)) {
-// 				//obj_rev[prop] = $.extend({}, obj2[prop]);
-// 				obj_rev[prop].compare_options = "add";
-// 			} else if(!(prop in obj2) && prop in obj1) {
-// 				//obj_rev[prop] = $.extend({}, obj1[prop]);
-// 				obj_rev[prop].compare_options = "del";
-// 			} else {
-// 				// if($.type(obj_rev[prop]) in {"string":"", "number":"", "boolean":"", "null":"", "undefined":""}) {
-// 				// 	//console.log(prop);
-// 				// 	//console.log(obj2[prop], obj1[prop]);
-// 				// 	if(obj2[prop] === obj1[prop]) {
-// 				// 		obj_rev.compare_options = "eq";
-// 				// 	} else {
-// 				// 		obj_rev.compare_options = "mod";
-// 				// 	}
-// 				// } else {
-// 				// 	compareJSON(obj_rev[prop], obj1[prop], obj2[prop]);
-// 				// }
-// 				if(obj1[prop].type !== obj2[prop].type) {
-// 					obj_rev[prop].compare_options = "mod";
-// 				} else {
-// 					if(obj1[prop].type === "text") {
-// 						if(obj1.data === obj2.data) {
-// 							obj_rev[prop].compare_options = "eq";
-// 						} else {
-// 							obj_rev[prop].compare_options = "mod";
-// 						}
-// 					} else {
-// 						compareJSON(obj_rev[prop], obj1[prop], obj2[prop]);
-// 					}
-// 				}
-// 			}
-// 		}
-// 	}
-// 	return true
-// }
-
-function compareJSON(obj_rev, obj1, obj2) {
+function _compareJSON(obj_rev, obj1, obj2) {
 	if(obj1.type !== obj2.type) {
 		obj_rev.compare_options = "type_mod";
 		obj_rev.type1 = obj1.type;
@@ -141,21 +97,19 @@ function compareJSON(obj_rev, obj1, obj2) {
 						if(equalJSON(obj1.data[prop], obj2.data[prop])) {
 							obj_rev.data[prop].compare_options = "eq";
 						} else {
-							compareJSON(obj_rev.data[prop], obj1.data[prop], obj2.data[prop]);
+							obj_rev.data[prop].compare_options = "mod";
+							_compareJSON(obj_rev.data[prop], obj1.data[prop], obj2.data[prop]);
 						}
 					}
 				}
 			} break;
 			case "list": {
-				// obj_rev.data.forEach(function(val, index, ary) {
-				// 	compareJSON(obj_rev.data[index], obj1.data[index], obj2.data[index]);
-				// });
 				var max_len = obj1.data.length > obj2.data.length ? obj1.data.length : obj2.data.length;
 				var min_len = obj1.data.length < obj2.data.length ? obj1.data.length : obj2.data.length;
 				obj_rev.data = copyJSON(obj2.data);
 				obj_rev.data = obj_rev.data.concat(copyJSON(obj1.data.slice(obj2.data.length)));
 				for(var i = 0; i < min_len; i++) {
-					compareJSON(obj_rev.data[i], obj1.data[i], obj2.data[i]);
+					_compareJSON(obj_rev.data[i], obj1.data[i], obj2.data[i]);
 				}
 				if(obj2.data.length === max_len) {
 					for(var i = min_len; i < max_len; i++) {
@@ -180,6 +134,31 @@ function compareJSON(obj_rev, obj1, obj2) {
 	}
 }
 
+function compareJSON(obj1, obj2) {
+	var prop_set = {},
+		prop = "",
+		obj_rev = {};
+	for(prop in obj1) {
+		prop_set[prop] = true;
+	}
+	for(prop in obj2) {
+		prop_set[prop] = true;
+	}
+	for(prop in prop_set) {
+		if(prop in obj2 && !(prop in obj1)) {
+			obj_rev[prop] = copyJSON(obj2[prop]);
+			obj_rev[prop].compare_options = "add";
+		} else if(!(prop in obj2) && prop in obj1) {
+			obj_rev[prop] = copyJSON(obj1[prop]);
+			obj_rev[prop].compare_options = "del";
+		} else {
+			extendJSON(obj_rev, obj1[prop], obj2[prop]);
+			_compareJSON(obj_rev, obj1[prop], obj2[prop]);
+		}
+	}
+	return obj_rev;
+}
+
 var obj1 = {
 	"type": "object",
 	"data": {
@@ -188,28 +167,15 @@ var obj1 = {
 			"data": [
 				{
 					"type": "text",
-					"data": "Chenglee"
+					"data": "Marry"
 				},
 				{
 					"type": "text",
 					"data": "Tom"
 				},
 				{
-					"type": "list",
-					"data": [
-						{
-							"type": "text",
-							"data": "Chenglee"
-						},
-						{
-							"type": "text",
-							"data": "cherlse"
-						},
-						{
-							"type": "text",
-							"data": "Tommmmmm"
-						}
-					]
+					"type": "text",
+					"data": "Jack"
 				}
 			]
 		},
@@ -353,7 +319,7 @@ var obj2 = {
 						"interest": {
 							"type": "list",
 							"data": [{
-								"type": "url",
+								"type": "text",
 								"data": "swimming"
 							}, {
 								"type": "text",
@@ -464,6 +430,19 @@ function equalJSON(obj1, obj2) {
 		str2 = json2Str(obj2);
 	return str1 === str2;		
 }
+
+function getPath($ele) {
+	var ary = [],
+		data_path = "",
+		$parent = $ele.parent();
+	while(!$parent.hasClass("tree")) {
+		if(data_path = $parent.attr("data-path")) {
+			ary.unshift("[data-path=" + data_path + "]");
+		}
+		$parent = $parent.parent();
+	}
+	return ary.join(" ");
+}
 // console.log(obj);
 // console.log(json2Str(obj));
 // console.log(json2Str(obj1));
@@ -481,6 +460,5 @@ function equalJSON(obj1, obj2) {
 
 var obj = {};
 extendJSON(obj, obj1, obj2);
-compareJSON(obj, obj1, obj2);
+_compareJSON(obj, obj1, obj2);
 console.log(json2Str(obj));
-// console.log(json2Str(obj));
