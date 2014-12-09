@@ -21,6 +21,18 @@
 .tree .eq {
     display: none;
 }
+.left .tree .tree-folder.add .tree-item .tree-item-name {
+    font-size: 0;
+}
+.left .tree .tree-folder.add .tree-item .tree-item-name:before {
+    font-size: 14px;
+    font-style: italic;
+    content: "这里米有数据哦";
+}
+.left .bg .tree .tree-folder.add .tree-item .tree-item-name:before {
+    font-size: 14px;
+    content: "";
+}
 .left .bg .add,
 .left .bg .add .tree-item,
 .left .bg .add .tree-folder-name,
@@ -254,6 +266,7 @@
 </div>
         {{/if}}
     {{else prop.type === "object" || prop.type === "list"}}
+        {{if prop.compare_options !== "add"}}
 <div class="tree-folder {{:prop.compare_options}} {{if prop.compare_options === 'eq' || !prop.compare_options}}closed{{/if}}" data-path="{{:key}}">
     <div class="tree-folder-header">
         <i class="ace-icon {{if prop.compare_options === 'eq' || !prop.compare_options}}tree-plus{{else}}tree-minus{{/if}}" data-icon-path="{{:key}}"></i>
@@ -265,6 +278,19 @@
         {{props prop.data}} {{include tmpl = "#tree_left" /}} {{/props}}
     </div>
 </div>
+        {{else}}
+<div class="tree-folder {{:prop.compare_options}} {{if prop.compare_options === 'eq' || !prop.compare_options}}closed{{/if}}" data-path="{{:key}}">
+    <div class="tree-folder-header">
+        <i class="ace-icon {{if prop.compare_options === 'eq' || !prop.compare_options}}tree-plus{{else}}tree-minus{{/if}}" data-icon-path="{{:key}}"></i>
+        <div class="tree-folder-name">
+            <span style="font-weight: bold"><i>这里米有数据哦</i></span>
+        </div>
+    </div>
+    <div class="tree-folder-content">
+        {{props prop.data}} {{include tmpl = "#tree_left" /}} {{/props}}
+    </div>
+</div>
+        {{/if}}
     {{/if}}
 {{else}}
     {{if prop.type === "text" || prop.type === "xml"}}
@@ -279,7 +305,7 @@
     <div class="tree-folder-header">
         <i class="ace-icon {{if prop.compare_options === 'eq' || !prop.compare_options}}tree-plus{{else}}tree-minus{{/if}}" data-icon-path="{{:key}}-{{:prop.type}}"></i>
         <div class="tree-folder-name">
-            <span style="font-weight: bold">{{:key}}</span>
+            <span style="font-weight: bold"><i>这里米有数据哦</i></span>
         </div>
     </div>
     <div class="tree-folder-content">
