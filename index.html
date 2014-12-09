@@ -21,15 +21,18 @@
 .tree .eq {
     display: none;
 }
+.left .tree .tree-folder.add .tree-folder-header .tree-folder-name span,
 .left .tree .tree-folder.add .tree-item .tree-item-name,
 .left .tree .tree-folder.add .tree-item .tree-item-name {
     font-size: 0;
 }
+.left .tree .tree-folder.add .tree-folder-header .tree-folder-name span:before,
 .left .tree .tree-folder.add .tree-item .tree-item-name:before {
     font-size: 14px;
     font-style: italic;
     content: "这里米有数据哦";
 }
+.left .bg .tree .tree-folder.add .tree-folder-header .tree-folder-name span:before,
 .left .bg .tree .tree-folder.add .tree-item .tree-item-name:before {
     font-size: 14px;
     content: "";
@@ -80,12 +83,74 @@
 .tree .tree-folder:last-child:after {
     left: -14px;
 }
+.tree .tree-folder.eq .tree-folder-content,
 .tree .tree-folder.closed .tree-folder-content {
     display: none;
 }
 /*
+* for tree-minus, tree-plus
+*/
+.tree .tree-folder .tree-folder-header .ace-icon.tree-minus:first-child:after {
+    display: none !important;
+}
+.tree .tree-folder-header .ace-icon:first-child {
+    font-style: normal;
+    vertical-align: middle;
+    height: 11px;
+    width: 11px;
+    -webkit-box-sizing: content-box;
+    -moz-box-sizing: content-box;
+    box-sizing: content-box;
+    text-align: center;
+    border: 1px solid #8BAEBF;
+    line-height: 10px;
+    background-color: #FFF;
+}
+/*
+* .tree-minus
+*/
+.tree .tree-folder.add .tree-folder-header .ace-icon:first-child:before,
+.tree .tree-folder.del .tree-folder-header .ace-icon:first-child:before,
+.tree .tree-folder.mod .tree-folder-header .ace-icon:first-child:before {
+    content: "";
+    display: block;
+    width: 7px;
+    height: 0;
+    border-top: 1px solid #4D6878;
+    position: absolute;
+    top: 5px;
+    left: 2px;
+}
+/*
+* .tree-plus
+*/
+.tree .tree-folder.eq .tree-folder-header .ace-icon:first-child:before {
+    content: "";
+    display: block;
+    width: 7px;
+    height: 0;
+    border-top: 1px solid #4D6878;
+    position: absolute;
+    top: 5px;
+    left: 2px;
+}
+.tree .tree-folder.eq .tree-folder-header .ace-icon:first-child:after {
+    content: "";
+    display: block;
+    height: 7px;
+    width: 0;
+    border-left: 1px solid #4D6878;
+    position: absolute;
+    top: 2px;
+    left: 5px;
+}
+/*********************************************************/
+/*
 * override 背景色
 */
+.bg .ace-icon {
+    border: none !important;
+}
 .left .bg,
 .right .bg {
 	position: absolute;
@@ -179,14 +244,14 @@
     {{if prop.type === "text" || prop.type === "xml"}}
 <div class="tree-item {{:prop.compare_options}}">
 	<div class="tree-item-name">
-        <i class="ace-icon ace-icon"></i> {{:key}}:
+        <i class="ace-icon"></i> {{:key}}:
         <span data-path="{{:key}}" class="data-{{:prop.type}} {{:prop.compare_options}}">{{>prop.data}}</span>
     </div>
 </div>
     {{else prop.type === "object" || prop.type === "list"}}
-<div class="tree-folder {{:prop.compare_options}} {{if prop.compare_options === 'eq' || !prop.compare_options}}closed{{/if}}" data-path="{{:key}}">
+<div class="tree-folder {{:prop.compare_options}}" data-path="{{:key}}">
     <div class="tree-folder-header">
-        <i class="ace-icon {{if prop.compare_options === 'eq' || !prop.compare_options}}tree-plus{{else}}tree-minus{{/if}}" data-icon-path="{{:key}}"></i>
+        <i class="ace-icon" data-icon-path="{{:key}}"></i>
         <div class="tree-folder-name">
             <span style="font-weight: bold">{{:key}}</span>
         </div>
@@ -200,14 +265,14 @@
     {{if prop.type === "text" || prop.type === "xml"}}
 <div class="tree-item add">
     <div class="tree-item-name">
-        <i class="ace-icon ace-icon"></i> {{:key}}:
+        <i class="ace-icon"></i> {{:key}}:
         <span class="data-{{:prop.type}}">{{>prop.data}}</span>
     </div>
 </div>
     {{else prop.type === "object" || prop.type === "list"}}
 <div class="tree-folder add" data-path="{{:key}}-{{:prop.type}}">
     <div class="tree-folder-header">
-        <i class="ace-icon tree-minus" data-icon-path="{{:key}}-{{:prop.type}}"></i>
+        <i class="ace-icon" data-icon-path="{{:key}}-{{:prop.type}}"></i>
         <div class="tree-folder-name">
             <span style="font-weight: bold">{{:key}}</span>
         </div>
@@ -221,14 +286,14 @@
     {{if prop.type1 === "text" || prop.type1 === "xml"}}
 <div class="tree-item del">
     <div class="tree-item-name">
-        <i class="ace-icon ace-icon"></i> {{:key}}:
+        <i class="ace-icon"></i> {{:key}}:
         <span class="data-{{:prop.type1}}">{{>prop.data1}}</span>
     </div>
 </div>
     {{else prop.type1 === "object" || prop.type1 === "list"}}
 <div class="tree-folder del" data-path="{{:key}}-{{:prop.type1}}">
     <div class="tree-folder-header">
-        <i class="ace-icon tree-minus" data-icon-path="{{:key}}-{{:prop.type1}}"></i>
+        <i class="ace-icon" data-icon-path="{{:key}}-{{:prop.type1}}"></i>
         <div class="tree-folder-name">
             <span style="font-weight: bold">{{:key}}</span>
         </div>
@@ -254,30 +319,30 @@
     	{{if prop.compare_options === "mod"}}
 <div class="tree-item {{:prop.compare_options}}">
 	<div class="tree-item-name">
-        <i class="ace-icon ace-icon"></i> {{:key}}:
+        <i class="ace-icon"></i> {{:key}}:
         <span data-path="{{:key}}" class="data-{{:prop.type}} {{:prop.compare_options}}">{{>prop.data1}}</span>
     </div>
 </div>
         {{else prop.compare_options === "add"}}
 <div class="tree-item {{:prop.compare_options}}">
     <div class="tree-item-name">
-        <i class="ace-icon ace-icon"></i>
+        <i class="ace-icon"></i>
         <span><i>这里米有数据哦</i></span>
     </div>
 </div>
 	   {{else}}
 <div class="tree-item {{:prop.compare_options}}">
 	<div class="tree-item-name">
-        <i class="ace-icon ace-icon"></i> {{:key}}:
+        <i class="ace-icon"></i> {{:key}}:
         <span class="data-{{:prop.type}}">{{:prop.data}}</span>
     </div>
 </div>
         {{/if}}
     {{else prop.type === "object" || prop.type === "list"}}
         {{if prop.compare_options !== "add"}}
-<div class="tree-folder {{:prop.compare_options}} {{if prop.compare_options === 'eq' || !prop.compare_options}}closed{{/if}}" data-path="{{:key}}">
+<div class="tree-folder {{:prop.compare_options}}" data-path="{{:key}}">
     <div class="tree-folder-header">
-        <i class="ace-icon {{if prop.compare_options === 'eq' || !prop.compare_options}}tree-plus{{else}}tree-minus{{/if}}" data-icon-path="{{:key}}"></i>
+        <i class="ace-icon" data-icon-path="{{:key}}"></i>
         <div class="tree-folder-name">
             <span style="font-weight: bold">{{:key}}</span>
         </div>
@@ -287,11 +352,11 @@
     </div>
 </div>
         {{else}}
-<div class="tree-folder {{:prop.compare_options}} {{if prop.compare_options === 'eq' || !prop.compare_options}}closed{{/if}}" data-path="{{:key}}">
+<div class="tree-folder {{:prop.compare_options}}" data-path="{{:key}}">
     <div class="tree-folder-header">
-        <i class="ace-icon {{if prop.compare_options === 'eq' || !prop.compare_options}}tree-plus{{else}}tree-minus{{/if}}" data-icon-path="{{:key}}"></i>
+        <i class="ace-icon" data-icon-path="{{:key}}"></i>
         <div class="tree-folder-name">
-            <span style="font-weight: bold"><i>这里米有数据哦</i></span>
+            <span style="font-weight: bold"></span>
         </div>
     </div>
     <div class="tree-folder-content">
@@ -304,16 +369,16 @@
     {{if prop.type === "text" || prop.type === "xml"}}
 <div class="tree-item add">
     <div class="tree-item-name">
-        <i class="ace-icon ace-icon"></i>
+        <i class="ace-icon"></i>
         <span class="data-{{:prop.type}}"><i>这里米有数据哦</i></span>
     </div>
 </div>
     {{else prop.type === "object" || prop.type === "list"}}
 <div class="tree-folder add" data-path="{{:key}}-{{:prop.type}}">
     <div class="tree-folder-header">
-        <i class="ace-icon {{if prop.compare_options === 'eq' || !prop.compare_options}}tree-plus{{else}}tree-minus{{/if}}" data-icon-path="{{:key}}-{{:prop.type}}"></i>
+        <i class="ace-icon" data-icon-path="{{:key}}-{{:prop.type}}"></i>
         <div class="tree-folder-name">
-            <span style="font-weight: bold"><i>这里米有数据哦</i></span>
+            <span style="font-weight: bold"></span>
         </div>
     </div>
     <div class="tree-folder-content">
@@ -326,14 +391,14 @@
     {{if prop.type1 === "text" || prop.type1 === "xml"}}
 <div class="tree-item del">
     <div class="tree-item-name">
-        <i class="ace-icon ace-icon"></i> {{:key}}:
+        <i class="ace-icon"></i> {{:key}}:
         <span class="data-{{:prop.type1}}">{{>prop.data1}}</span>
     </div>
 </div>
     {{else prop.type1 === "object" || prop.type1 === "list"}}
 <div class="tree-folder del" data-path="{{:key}}-{{:prop.type1}}">
     <div class="tree-folder-header">
-        <i class="ace-icon {{if prop.compare_options === 'eq' || !prop.compare_options}}tree-plus{{else}}tree-minus{{/if}}" data-icon-path="{{:key}}-{{:prop.type1}}"></i>
+        <i class="ace-icon" data-icon-path="{{:key}}-{{:prop.type1}}"></i>
         <div class="tree-folder-name">
             <span style="font-weight: bold">{{:key}}</span>
         </div>
@@ -358,14 +423,14 @@
     {{if prop.type === "text" || prop.type === "xml"}}
 <div class="tree-item {{:prop.compare_options}}">
 	<div class="tree-item-name">
-        <i class="ace-icon ace-icon"></i>
+        <i class="ace-icon"></i>
         <span class="data-{{:prop.type}}"></span>
     </div>
 </div>
     {{else prop.type === "object" || prop.type === "list"}}
-<div class="tree-folder {{:prop.compare_options}} {{if prop.compare_options === 'eq' || !prop.compare_options}}closed{{/if}}" data-path="{{:key}}">
+<div class="tree-folder {{:prop.compare_options}}" data-path="{{:key}}">
     <div class="tree-folder-header {{:prop.compare_options}}">
-        <i class="ace-icon hide {{if prop.compare_options === 'eq' || !prop.compare_options}}tree-plus{{else}}tree-minus{{/if}}" data-icon-path="{{:key}}"></i>
+        <i class="ace-icon hide" data-icon-path="{{:key}}"></i>
         <div class="tree-folder-name">
             <span style="font-weight: bold"></span>
         </div>
@@ -379,14 +444,14 @@
     {{if prop.type === "text" || prop.type === "xml"}}
 <div class="tree-item add">
     <div class="tree-item-name">
-        <i class="ace-icon ace-icon"></i>
+        <i class="ace-icon"></i>
         <span class="data-{{:prop.type}}"></span>
     </div>
 </div>
     {{else prop.type === "object" || prop.type === "list"}}
 <div class="tree-folder add" data-path="{{:key}}-{{:prop.type}}">
     <div class="tree-folder-header add">
-        <i class="ace-icon hide tree-minus" data-icon-path="{{:key}}-{{:prop.type}}"></i>
+        <i class="ace-icon hide" data-icon-path="{{:key}}-{{:prop.type}}"></i>
         <div class="tree-folder-name">
             <span style="font-weight: bold"></span>
         </div>
@@ -400,14 +465,14 @@
     {{if prop.type1 === "text" || prop.type1 === "xml"}}
 <div class="tree-item del">
     <div class="tree-item-name">
-        <i class="ace-icon ace-icon"></i>
+        <i class="ace-icon"></i>
         <span class="data-{{:prop.type1}}"></span>
     </div>
 </div>
     {{else prop.type1 === "object" || prop.type1 === "list"}}
 <div class="tree-folder del" data-path="{{:key}}-{{:prop.type1}}">
     <div class="tree-folder-header del">
-        <i class="ace-icon hide tree-minus" data-icon-path="{{:key}}-{{:prop.type1}}"></i>
+        <i class="ace-icon hide" data-icon-path="{{:key}}-{{:prop.type1}}"></i>
         <div class="tree-folder-name">
             <span style="font-weight: bold"></span>
         </div>
@@ -507,19 +572,19 @@ $("#tree_right_con").html(text_right);
 $("#tree_left_con").html(text_left);
 $("#tree_left_bg_con, #tree_right_bg_con").html(text_bg);
 
-$(".tree-minus, .tree-plus").bind("click", function(event) {
+$(".ace-icon").bind("click", function(event) {
     var $this = $(this),
         path = getPath($this),
         eles_sl = "",
-        type = "minus";
-    if($this.hasClass("tree-plus")) {
-        type = "plus";
+        toggle_class = "tree-plus";
+    if($this.parent().parent().hasClass("eq")) {
+         toggle_class = "tree-minus";
     }
     eles_sl += ".left " + path  + " [data-icon-path='" + $this.attr("data-icon-path") + "']";
     eles_sl += ", .right " + path  + " [data-icon-path='" + $this.attr("data-icon-path") + "']";
     $(eles_sl).parent().toggleClass("closed").next().toggle("hide");
-    if(type === "minus") $(eles_sl).removeClass("tree-minus").addClass("tree-plus");
-    else if(type === "plus") $(eles_sl).removeClass("tree-plus").addClass("tree-minus");
+    $(eles_sl).toggleClass(toggle_class);
+    console.log(toggle_class)
 });
 
 $("#bu").bind("click", function(event) {
