@@ -187,9 +187,9 @@
     </div>
 </div>
     {{else prop.type === "object" || prop.type === "list"}}
-<div class="tree-folder add" data-path="{{:key}}">
+<div class="tree-folder add" data-path="{{:key}}-{{:prop.type}}">
     <div class="tree-folder-header">
-        <i class="ace-icon tree-minus" data-icon-path="{{:key}}"></i>
+        <i class="ace-icon tree-minus" data-icon-path="{{:key}}-{{:prop.type}}"></i>
         <div class="tree-folder-name">
             <span style="font-weight: bold">{{:key}}</span>
         </div>
@@ -208,9 +208,9 @@
     </div>
 </div>
     {{else prop.type1 === "object" || prop.type1 === "list"}}
-<div class="tree-folder del" data-path="{{:key}}">
+<div class="tree-folder del" data-path="{{:key}}-{{:prop.type1}}">
     <div class="tree-folder-header">
-        <i class="ace-icon tree-minus" data-icon-path="{{:key}}"></i>
+        <i class="ace-icon tree-minus" data-icon-path="{{:key}}-{{:prop.type1}}"></i>
         <div class="tree-folder-name">
             <span style="font-weight: bold">{{:key}}</span>
         </div>
@@ -273,9 +273,9 @@
     </div>
 </div>
     {{else prop.type === "object" || prop.type === "list"}}
-<div class="tree-folder add" data-path="{{:key}}">
+<div class="tree-folder add" data-path="{{:key}}-{{:prop.type}}">
     <div class="tree-folder-header">
-        <i class="ace-icon {{if prop.compare_options === 'eq' || !prop.compare_options}}tree-plus{{else}}tree-minus{{/if}}" data-icon-path="{{:key}}"></i>
+        <i class="ace-icon {{if prop.compare_options === 'eq' || !prop.compare_options}}tree-plus{{else}}tree-minus{{/if}}" data-icon-path="{{:key}}-{{:prop.type}}"></i>
         <div class="tree-folder-name">
             <span style="font-weight: bold">{{:key}}</span>
         </div>
@@ -295,9 +295,9 @@
     </div>
 </div>
     {{else prop.type1 === "object" || prop.type1 === "list"}}
-<div class="tree-folder del" data-path="{{:key}}">
+<div class="tree-folder del" data-path="{{:key}}-{{:prop.type1}}">
     <div class="tree-folder-header">
-        <i class="ace-icon {{if prop.compare_options === 'eq' || !prop.compare_options}}tree-plus{{else}}tree-minus{{/if}}" data-icon-path="{{:key}}"></i>
+        <i class="ace-icon {{if prop.compare_options === 'eq' || !prop.compare_options}}tree-plus{{else}}tree-minus{{/if}}" data-icon-path="{{:key}}-{{:prop.type1}}"></i>
         <div class="tree-folder-name">
             <span style="font-weight: bold">{{:key}}</span>
         </div>
@@ -346,9 +346,9 @@
     </div>
 </div>
     {{else prop.type === "object" || prop.type === "list"}}
-<div class="tree-folder add" data-path="{{:key}}">
+<div class="tree-folder add" data-path="{{:key}}-{{:prop.type}}">
     <div class="tree-folder-header add">
-        <i class="ace-icon hide tree-minus" data-icon-path="{{:key}}"></i>
+        <i class="ace-icon hide tree-minus" data-icon-path="{{:key}}-{{:prop.type}}"></i>
         <div class="tree-folder-name">
             <span style="font-weight: bold"></span>
         </div>
@@ -367,9 +367,9 @@
     </div>
 </div>
     {{else prop.type1 === "object" || prop.type1 === "list"}}
-<div class="tree-folder del" data-path="{{:key}}">
+<div class="tree-folder del" data-path="{{:key}}-{{:prop.type1}}">
     <div class="tree-folder-header del">
-        <i class="ace-icon hide tree-minus" data-icon-path="{{:key}}"></i>
+        <i class="ace-icon hide tree-minus" data-icon-path="{{:key}}-{{:prop.type1}}"></i>
         <div class="tree-folder-name">
             <span style="font-weight: bold"></span>
         </div>
