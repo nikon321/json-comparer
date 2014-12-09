@@ -21,6 +21,7 @@
 .tree .eq {
     display: none;
 }
+.left .tree .tree-folder.add .tree-item .tree-item-name,
 .left .tree .tree-folder.add .tree-item .tree-item-name {
     font-size: 0;
 }
@@ -72,7 +73,6 @@
 .right .mod {
 	color: #c9284d;
 }
-
 .tree .tree-folder .tree-folder-header:hover,
 .tree .tree-item:hover {
     background-color: inherit;
@@ -119,6 +119,7 @@
 }
 .tree {
     margin-left: 8px;
+    overflow: hidden;
 }
 .bg .tree {
     margin-left: 0;
@@ -170,6 +171,9 @@
 </style>
 </head>
 <body>
+<!-- 
+  ** tree_right 
+-->
 <script type="text/x-jsrender" id="tree_right">
 {{if prop.compare_options !== "type_mod"}}
     {{if prop.type === "text" || prop.type === "xml"}}
@@ -239,7 +243,11 @@
 <script type="text/x-jsrender" id="html_right">
 	{{props :}} {{include tmpl = "#tree_right" /}} {{/props}}
 </script>
+<!-- ******************************************************* -->
 
+<!-- 
+  **  tree_left 
+-->
 <script type="text/x-jsrender" id="tree_left">
 {{if prop.compare_options !== "type_mod"}}
     {{if prop.type === "text" || prop.type === "xml"}}
@@ -340,9 +348,11 @@
 <script type="text/x-jsrender" id="html_left">
 	{{props :}} {{include tmpl = "#tree_left" /}} {{/props}}
 </script>
+<!-- ********************************************************* -->
 
-
-<!--背景模板 -->
+<!-- 
+  ** 背景模板 
+-->
 <script type="text/x-jsrender" id="tree_bg">
 {{if prop.compare_options !== "type_mod"}}
     {{if prop.type === "text" || prop.type === "xml"}}
@@ -412,6 +422,8 @@
 <script type="text/x-jsrender" id="html_bg">
 	{{props :}} {{include tmpl = "#tree_bg" /}} {{/props}}
 </script>
+<!-- ********************************************************* -->
+
 <div id="text_compare_modal" class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" style="display: none;">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
