@@ -1,194 +1,302 @@
-var META_TYPE = {
-	"string": "",
-	"number": "",
-	"boolean": "",
-	"null": "",
-	"undefined": "",
-	"NaN": ""
-}
+(function(global, undefined) {
+	var META_TYPE = {
+		"string": "",
+		"number": "",
+		"boolean": "",
+		"null": "",
+		"undefined": "",
+		"NaN": ""
+	};
 
-function copyJSON(obj) {
-	var obj_rev = {};
-	if(type(obj) === "object") {
-		for(var prop in obj) {
-			obj_rev[prop] = copyJSON(obj[prop]);
-		}
-	} else if(type(obj) === "array") {
-		obj_rev = new Array(obj.length);
-		for(var i = 0, len = obj_rev.length; i < len; i++) {
-			obj_rev[i] = {};
-		}
-		obj.forEach(function(val, index, ary) {
-			obj_rev[index] = copyJSON(val);
-		});
-	} else {
-		obj_rev = obj;
-	}
-	return obj_rev;
-}
-
-function extendJSON(obj_rev, obj1, obj2) {
-	obj2 = obj2 ? obj2 : {};
-	if(type(obj1) === "object" && type(obj2) === "object") {
-		for(var prop in obj1) {
-			if(typeof obj1[prop] in META_TYPE) {
-				obj_rev[prop] = obj1[prop];
-			} else if(obj1[prop] instanceof Array) {
-				obj_rev[prop] = new Array(obj1[prop].length);
-				obj1[prop].forEach(function(val, index, ary) {
-					obj_rev[prop][index] = copyJSON(val);
-				});
-			} else if(typeof obj1[prop] === "object") {
-				obj_rev[prop] = {};
-				extendJSON(obj_rev[prop], obj1[prop]);
+	function copyJSON(obj) {
+		var obj_rev = {};
+		if(type(obj) === "object") {
+			for(var prop in obj) {
+				obj_rev[prop] = copyJSON(obj[prop]);
 			}
+		} else if(type(obj) === "array") {
+			obj_rev = new Array(obj.length);
+			for(var i = 0, len = obj_rev.length; i < len; i++) {
+				obj_rev[i] = {};
+			}
+			obj.forEach(function(val, index, ary) {
+				obj_rev[index] = copyJSON(val);
+			});
+		} else {
+			obj_rev = obj;
 		}
+		return obj_rev;
+	}
 
-		for(var prop in obj2) {
-			if(typeof obj2[prop] in META_TYPE) {
-				obj_rev[prop] = obj2[prop];
-			} else if(obj2[prop] instanceof Array) {
-				if(prop in obj_rev) {
-					var ary_tmp = new Array(obj_rev[prop].length),
-						prop_tmp = "";
-					obj_rev[prop].forEach(function(val, index, ary) {
-						ary_tmp[index] = json2Str(copyJSON(val));
-					});
-					obj2[prop].forEach(function(val, index, ary) {
-						//ary_tmp2[index] = json2Str(copyJSON(val));
-						prop_tmp = json2Str(copyJSON(val));
-						if(ary_tmp.indexOf(prop_tmp) === -1) {
-							obj_rev[prop].push(copyJSON(val));
-						}
-					});
-
-				} else {
-					obj_rev[prop] = new Array(obj2[prop].length);
-					obj2[prop].forEach(function(val, index, ary) {
+	function extendJSON(obj_rev, obj1, obj2) {
+		obj2 = obj2 ? obj2 : {};
+		if(type(obj1) === "object" && type(obj2) === "object") {
+			for(var prop in obj1) {
+				if(typeof obj1[prop] in META_TYPE) {
+					obj_rev[prop] = obj1[prop];
+				} else if(obj1[prop] instanceof Array) {
+					obj_rev[prop] = new Array(obj1[prop].length);
+					obj1[prop].forEach(function(val, index, ary) {
 						obj_rev[prop][index] = copyJSON(val);
 					});
-				}
-			} else if(typeof obj2[prop] === "object") {
-				if(!(prop in obj_rev)) {
+				} else if(typeof obj1[prop] === "object") {
 					obj_rev[prop] = {};
+					extendJSON(obj_rev[prop], obj1[prop]);
 				}
-				extendJSON(obj_rev[prop], {}, obj2[prop]);
+			}
+
+			for(var prop in obj2) {
+				if(typeof obj2[prop] in META_TYPE) {
+					obj_rev[prop] = obj2[prop];
+				} else if(obj2[prop] instanceof Array) {
+					if(prop in obj_rev) {
+						var ary_tmp = new Array(obj_rev[prop].length),
+							prop_tmp = "";
+						obj_rev[prop].forEach(function(val, index, ary) {
+							ary_tmp[index] = json2Str(copyJSON(val));
+						});
+						obj2[prop].forEach(function(val, index, ary) {
+							//ary_tmp2[index] = json2Str(copyJSON(val));
+							prop_tmp = json2Str(copyJSON(val));
+							if(ary_tmp.indexOf(prop_tmp) === -1) {
+								obj_rev[prop].push(copyJSON(val));
+							}
+						});
+
+					} else {
+						obj_rev[prop] = new Array(obj2[prop].length);
+						obj2[prop].forEach(function(val, index, ary) {
+							obj_rev[prop][index] = copyJSON(val);
+						});
+					}
+				} else if(typeof obj2[prop] === "object") {
+					if(!(prop in obj_rev)) {
+						obj_rev[prop] = {};
+					}
+					extendJSON(obj_rev[prop], {}, obj2[prop]);
+				}
 			}
 		}
 	}
-}
 
-function _compareJSON(obj_rev, obj1, obj2) {
-	if(obj1.type !== obj2.type) {
-		obj_rev.compare_options = "type_mod";
-		obj_rev.type1 = obj1.type;
-		obj_rev.data1 = obj1.data;
-		obj_rev.type = obj2.type;
-		obj_rev.data = obj2.data;
-	} else {
-		switch(obj1.type) {
-			case "object": {
-				for(var prop in obj_rev.data) {
-					if(prop in obj2.data && !(prop in obj1.data)) {
-						obj_rev.data[prop].compare_options = "add";
-					} else if(!(prop in obj2.data) && prop in obj1.data) {
-						obj_rev.data[prop].compare_options = "del";
-					} else {
-						if(equalJSON(obj1.data[prop], obj2.data[prop])) {
-							obj_rev.data[prop].compare_options = "eq";
+	function _compareJSON(obj_rev, obj1, obj2) {
+		if(obj1.type !== obj2.type) {
+			obj_rev.compare_options = "type_mod";
+			obj_rev.type1 = obj1.type;
+			obj_rev.data1 = obj1.data;
+			obj_rev.type = obj2.type;
+			obj_rev.data = obj2.data;
+		} else {
+			switch(obj1.type) {
+				case "object": {
+					for(var prop in obj_rev.data) {
+						if(prop in obj2.data && !(prop in obj1.data)) {
+							obj_rev.data[prop].compare_options = "add";
+						} else if(!(prop in obj2.data) && prop in obj1.data) {
+							obj_rev.data[prop].compare_options = "del";
 						} else {
-							obj_rev.data[prop].compare_options = "mod";
-							_compareJSON(obj_rev.data[prop], obj1.data[prop], obj2.data[prop]);
+							if(equalJSON(obj1.data[prop], obj2.data[prop])) {
+								obj_rev.data[prop].compare_options = "eq";
+							} else {
+								obj_rev.data[prop].compare_options = "mod";
+								_compareJSON(obj_rev.data[prop], obj1.data[prop], obj2.data[prop]);
+							}
 						}
 					}
-				}
-			} break;
-			case "list": {
-				var max_len = obj1.data.length > obj2.data.length ? obj1.data.length : obj2.data.length;
-				var min_len = obj1.data.length < obj2.data.length ? obj1.data.length : obj2.data.length;
-				obj_rev.data = copyJSON(obj2.data);
-				obj_rev.data = obj_rev.data.concat(copyJSON(obj1.data.slice(obj2.data.length)));
-				for(var i = 0; i < min_len; i++) {
-					if(equalJSON(obj1.data[i], obj2.data[i]))
-						obj_rev.data[i].compare_options = "eq";
-					else {
-						obj_rev.data[i].compare_options = "mod";
-						_compareJSON(obj_rev.data[i], obj1.data[i], obj2.data[i]);
+				} break;
+				case "list": {
+					var max_len = obj1.data.length > obj2.data.length ? obj1.data.length : obj2.data.length;
+					var min_len = obj1.data.length < obj2.data.length ? obj1.data.length : obj2.data.length;
+					obj_rev.data = copyJSON(obj2.data);
+					obj_rev.data = obj_rev.data.concat(copyJSON(obj1.data.slice(obj2.data.length)));
+					for(var i = 0; i < min_len; i++) {
+						if(equalJSON(obj1.data[i], obj2.data[i]))
+							obj_rev.data[i].compare_options = "eq";
+						else {
+							obj_rev.data[i].compare_options = "mod";
+							_compareJSON(obj_rev.data[i], obj1.data[i], obj2.data[i]);
+						}
 					}
-				}
-				if(obj2.data.length === max_len) {
-					for(var i = min_len; i < max_len; i++) {
-						obj_rev.data[i].compare_options = "add";
+					if(obj2.data.length === max_len) {
+						for(var i = min_len; i < max_len; i++) {
+							obj_rev.data[i].compare_options = "add";
+						}
+					} else {
+						for(var i = min_len; i < max_len; i++) {
+							obj_rev.data[i].compare_options = "del";
+						}
 					}
-				} else {
-					for(var i = min_len; i < max_len; i++) {
-						obj_rev.data[i].compare_options = "del";
+				} break;
+				case "text": {
+					if(obj1.data === obj2.data) {
+						obj_rev.compare_options = "eq";
+					} else {
+						obj_rev.compare_options = "mod";
+						obj_rev.data1 = obj1.data;
 					}
-				}
-			} break;
-			case "text": {
-				if(obj1.data === obj2.data) {
-					obj_rev.compare_options = "eq";
-				} else {
-					obj_rev.compare_options = "mod";
-					obj_rev.data1 = obj1.data;
-				}
-			} break;
-			case "xml": {
-				if(obj1.data === obj2.data) {
-					obj_rev.compare_options = "eq";
-				} else {
-					obj_rev.compare_options = "mod";
-					obj_rev.data1 = obj1.data;
-				}
-			} break;
-			default: {}
-		}
-	}
-}
-
-function compareJSON(obj1, obj2) {
-	var prop_set = {},
-		prop = "",
-		obj_rev = {};
-	for(prop in obj1) {
-		prop_set[prop] = true;
-	}
-	for(prop in obj2) {
-		prop_set[prop] = true;
-	}
-	for(prop in prop_set) {
-		if(prop in obj2 && !(prop in obj1)) {
-			obj_rev[prop] = copyJSON(obj2[prop]);
-			obj_rev[prop].compare_options = "add";
-		} else if(!(prop in obj2) && prop in obj1) {
-			obj_rev[prop] = copyJSON(obj1[prop]);
-			obj_rev[prop].compare_options = "del";
-		} else {
-			if(obj1[prop].type !== obj2[prop].type) {
-				obj_rev[prop] = {};
-				obj_rev[prop].compare_options = "type_mod";
-				obj_rev[prop].type = obj2[prop].type;
-				obj_rev[prop].data = obj2[prop].data;
-				obj_rev[prop].type1 = obj1[prop].type;
-				obj_rev[prop].data1 = obj1[prop].data;
-			} else {
-				if(equalJSON(obj1[prop], obj2[prop])) {
-					obj_rev[prop] = {};
-					obj_rev[prop].compare_options = "eq";
-					extendJSON(obj_rev[prop], obj1[prop], obj2[prop]);
-					_compareJSON(obj_rev[prop], obj1[prop], obj2[prop]);
-				} else {
-					obj_rev[prop] = {};
-					obj_rev[prop].compare_options = "mod";
-					extendJSON(obj_rev[prop], obj1[prop], obj2[prop]);
-					_compareJSON(obj_rev[prop], obj1[prop], obj2[prop]);
-				}
+				} break;
+				case "xml": {
+					if(obj1.data === obj2.data) {
+						obj_rev.compare_options = "eq";
+					} else {
+						obj_rev.compare_options = "mod";
+						obj_rev.data1 = obj1.data;
+					}
+				} break;
+				default: {}
 			}
 		}
 	}
-	return obj_rev;
-}
+
+	function compareJSON(obj1, obj2) {
+		var prop_set = {},
+			prop = "",
+			obj_rev = {};
+		for(prop in obj1) {
+			prop_set[prop] = true;
+		}
+		for(prop in obj2) {
+			prop_set[prop] = true;
+		}
+		for(prop in prop_set) {
+			if(prop in obj2 && !(prop in obj1)) {
+				obj_rev[prop] = copyJSON(obj2[prop]);
+				obj_rev[prop].compare_options = "add";
+			} else if(!(prop in obj2) && prop in obj1) {
+				obj_rev[prop] = copyJSON(obj1[prop]);
+				obj_rev[prop].compare_options = "del";
+			} else {
+				if(obj1[prop].type !== obj2[prop].type) {
+					obj_rev[prop] = {};
+					obj_rev[prop].compare_options = "type_mod";
+					obj_rev[prop].type = obj2[prop].type;
+					obj_rev[prop].data = obj2[prop].data;
+					obj_rev[prop].type1 = obj1[prop].type;
+					obj_rev[prop].data1 = obj1[prop].data;
+				} else {
+					if(equalJSON(obj1[prop], obj2[prop])) {
+						obj_rev[prop] = {};
+						obj_rev[prop].compare_options = "eq";
+						extendJSON(obj_rev[prop], obj1[prop], obj2[prop]);
+						_compareJSON(obj_rev[prop], obj1[prop], obj2[prop]);
+					} else {
+						obj_rev[prop] = {};
+						obj_rev[prop].compare_options = "mod";
+						extendJSON(obj_rev[prop], obj1[prop], obj2[prop]);
+						_compareJSON(obj_rev[prop], obj1[prop], obj2[prop]);
+					}
+				}
+			}
+		}
+		return obj_rev;
+	}
+
+	function type(arg) {
+		if(arg instanceof Array) return "array";
+		return typeof arg;
+	}
+
+	function _json2Str(obj) {
+		var props = [],
+			strs = [];
+		if(type(obj) === "object") {
+			for(var prop in obj) {
+				props.push(prop);
+			}
+			props.sort();
+			props.forEach(function(prop, index, ary) {
+				if(type(obj[prop]) in META_TYPE) {
+					strs.push("\"" + prop + "\":\"" + obj[prop]  + "\"");
+				} else if(type(obj[prop]) === "array") {
+					strs.push("\"" + prop + "\":" + "[" + _json2Str(obj[prop]) + "]");
+				} else if(type(obj[prop]) === "object") {
+					strs.push("\"" + prop + "\":" + "{" + _json2Str(obj[prop]) + "}");
+				}
+			});
+			return strs.join(",");
+		} else if(type(obj) === "array") {
+			obj.forEach(function(val, index, ary) {
+				if(type(val) === "array") {
+					ary[index] = "[" + _json2Str(ary[index]) + "]";
+				}
+				else if(type(val) === "object")
+					ary[index] = "{" + _json2Str(ary[index]) + "}";
+				else
+					ary[index] = "\"" + ary[index] + "\"";
+			});
+			//obj.sort();
+			return obj.toString();
+		}
+	}
+
+	function json2Str(obj) {
+		var obj_tmp = copyJSON(obj);
+		if(type(obj_tmp) === "object") return "{" + _json2Str(obj_tmp) + "}";
+		if(type(obj_tmp) === "array") return "[" + _json2Str(obj_tmp) + "]";
+		return "" + obj_tmp;
+	}
+
+	function equalJSON(obj1, obj2) {
+		var str1 = json2Str(obj1),
+			str2 = json2Str(obj2);
+		return str1 === str2;		
+	}
+
+	function getPath($ele) {
+		var ary = [],
+			data_path = "",
+			$parent = $ele.parent();
+		while(!$parent.hasClass("tree")) {
+			if(data_path = $parent.attr("data-path")) {
+				ary.unshift("[data-path=" + data_path + "]");
+			}
+			$parent = $parent.parent();
+		}
+		return ary.join(" ");
+	}
+
+	function formatXml(xml) {
+		var formatted, pad, reg;
+		formatted = '';
+		reg = /(>) *(<)(\/*)/g;
+		xml = xml.replace(reg, '$1\n$2$3');
+		xml = xml.replace(/(\/)( *)(>)/g, '$1$3\n');
+		xml = xml.replace(/\n{2,}/g, '\n');
+		xml = xml.replace(/\"/g, "'");
+		pad = 0;
+		$.each(xml.split('\n'), function(index, node) {
+			var i, indent, padding, _i;
+			indent = 0;
+			if (node.match(/.+<\/\w[^>]*>$/)) {
+				indent = 0;
+			} else if (node.match(/^<\/\w/)) {
+				if (pad !== 0) {
+					pad -= 1;
+				}
+			} else if (node.match(/^<\w[^>]*[^\/]>.*$/)) {
+				indent = 1;
+			} else {
+				indent = 0;
+			}
+			padding = '';
+			for (i = _i = 0; 0 <= pad ? _i < pad : _i > pad; i = 0 <= pad ? ++_i : --_i) {
+				padding += '  ';
+			}
+			formatted += padding + node + '\n';
+			return pad += indent;
+		});
+		formatted = formatted.replace(/>/g, "&gt");
+		formatted = formatted.replace(/</g, "&lt");
+		return formatted;
+	};
+
+	global.compareJSON = compareJSON;
+	global.formatXml = formatXml;
+	global.getPath = getPath;
+	global.json2Str = json2Str;
+})(this);
+
+
 
 var obj1 = {
 	"type": "object",
@@ -423,105 +531,6 @@ var obj2 = {
 // 		]
 // 	}
 // ];
-
-function type(arg) {
-	if(arg instanceof Array) return "array";
-	return typeof arg;
-}
-
-function _json2Str(obj) {
-	var props = [],
-		strs = [];
-	if(type(obj) === "object") {
-		for(var prop in obj) {
-			props.push(prop);
-		}
-		props.sort();
-		props.forEach(function(prop, index, ary) {
-			if(type(obj[prop]) in META_TYPE) {
-				strs.push("\"" + prop + "\":\"" + obj[prop]  + "\"");
-			} else if(type(obj[prop]) === "array") {
-				strs.push("\"" + prop + "\":" + "[" + _json2Str(obj[prop]) + "]");
-			} else if(type(obj[prop]) === "object") {
-				strs.push("\"" + prop + "\":" + "{" + _json2Str(obj[prop]) + "}");
-			}
-		});
-		return strs.join(",");
-	} else if(type(obj) === "array") {
-		obj.forEach(function(val, index, ary) {
-			if(type(val) === "array") {
-				ary[index] = "[" + _json2Str(ary[index]) + "]";
-			}
-			else if(type(val) === "object")
-				ary[index] = "{" + _json2Str(ary[index]) + "}";
-			else
-				ary[index] = "\"" + ary[index] + "\"";
-		});
-		//obj.sort();
-		return obj.toString();
-	}
-}
-
-function json2Str(obj) {
-	var obj_tmp = copyJSON(obj);
-	if(type(obj_tmp) === "object") return "{" + _json2Str(obj_tmp) + "}";
-	if(type(obj_tmp) === "array") return "[" + _json2Str(obj_tmp) + "]";
-	return "" + obj_tmp;
-}
-
-function equalJSON(obj1, obj2) {
-	var str1 = json2Str(obj1),
-		str2 = json2Str(obj2);
-	return str1 === str2;		
-}
-
-function getPath($ele) {
-	var ary = [],
-		data_path = "",
-		$parent = $ele.parent();
-	while(!$parent.hasClass("tree")) {
-		if(data_path = $parent.attr("data-path")) {
-			ary.unshift("[data-path=" + data_path + "]");
-		}
-		$parent = $parent.parent();
-	}
-	return ary.join(" ");
-}
-
-function formatXml(xml) {
-	var formatted, pad, reg;
-	formatted = '';
-	reg = /(>) *(<)(\/*)/g;
-	xml = xml.replace(reg, '$1\n$2$3');
-	xml = xml.replace(/(\/)( *)(>)/g, '$1$3\n');
-	xml = xml.replace(/\n{2,}/g, '\n');
-	xml = xml.replace(/\"/g, "'");
-	pad = 0;
-	$.each(xml.split('\n'), function(index, node) {
-		var i, indent, padding, _i;
-		indent = 0;
-		if (node.match(/.+<\/\w[^>]*>$/)) {
-			indent = 0;
-		} else if (node.match(/^<\/\w/)) {
-			if (pad !== 0) {
-				pad -= 1;
-			}
-		} else if (node.match(/^<\w[^>]*[^\/]>.*$/)) {
-			indent = 1;
-		} else {
-			indent = 0;
-		}
-		padding = '';
-		for (i = _i = 0; 0 <= pad ? _i < pad : _i > pad; i = 0 <= pad ? ++_i : --_i) {
-			padding += '  ';
-		}
-		formatted += padding + node + '\n';
-		return pad += indent;
-	});
-	formatted = formatted.replace(/>/g, "&gt");
-	formatted = formatted.replace(/</g, "&lt");
-	return formatted;
-};
 // console.log(obj);
 // console.log(json2Str(obj));
 // console.log(json2Str(obj1));
