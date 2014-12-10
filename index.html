@@ -625,9 +625,10 @@ $(".data-xml").bind("click", function(event) {
         sl_right = ".right " + path + " [data-path='" + $this.attr("data-path") + "']",
         text_left = formatXml($(sl_left).eq(0).text()),
         text_right = formatXml($(sl_right).eq(0).text()),
-        diff_type = "diffWords",
+        diff_type = "diffChars",
         html = "",
         diff = JsDiff[diff_type](text_right, text_left);
+
     diff.forEach(function(val, index, ary) {
         if(val.added) html += "<ins>" + val.value + "</ins>";
         else if(val.removed) html += "<del>" + val.value + "</del>";
